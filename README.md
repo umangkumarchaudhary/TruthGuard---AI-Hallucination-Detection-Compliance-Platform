@@ -68,9 +68,13 @@ TruthGuard/
 - [Database Schema](./database/README.md) - Database documentation
 - [Setup Guide](./SETUP_GUIDE.md) - Detailed setup instructions
 
-## ✅ Phase 1 Status: COMPLETE
+## ✅ Phase 1 & 2 Status: COMPLETE
 
-**See [PHASE_1_COMPLETION.md](./PHASE_1_COMPLETION.md) for:**
+**See completion reports:**
+- **[PHASE_1_COMPLETION.md](./PHASE_1_COMPLETION.md)** - Foundation & Infrastructure
+- **[PHASE_2_COMPLETION.md](./PHASE_2_COMPLETION.md)** - Core Detection Engine
+
+**Each includes:**
 - What was built
 - How it works
 - Interview preparation guide
@@ -79,11 +83,13 @@ TruthGuard/
 ## 🎯 Current Progress
 
 - ✅ Phase 1: Foundation & Infrastructure - **COMPLETE**
-- ⏳ Phase 2: Core Detection Engine - Next
-- ⏳ Phase 3: Compliance & Policy Engine
+- ✅ Phase 2: Core Detection Engine - **COMPLETE**
+- ⏳ Phase 3: Compliance & Policy Engine - Next
 - ⏳ Phase 4: Audit Trail & Logging
 - ⏳ Phase 5: Frontend Dashboard
 - ⏳ Phase 6: Integration & Testing
+
+**Overall Progress: 44% (28/64 steps)**
 
 ## 🔗 Key Endpoints
 
@@ -91,6 +97,7 @@ TruthGuard/
 - `GET /health` - Health check
 - `GET /test-db` - Database connection test
 - `GET /api/v1/info` - API version info
+- `POST /api/v1/validate` - **Validate AI responses** (Main endpoint)
 - `GET /docs` - Swagger UI (FastAPI)
 
 ## 🛠️ Tech Stack
