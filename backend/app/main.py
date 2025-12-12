@@ -46,6 +46,7 @@ app.add_middleware(
 
 # Import database utilities after app creation
 from app.utils.supabase_client import get_supabase_client, test_connection
+from app.api.v1 import router as v1_router
 
 @app.on_event("startup")
 async def startup_event():
@@ -86,4 +87,7 @@ async def test_db():
     """
     result = test_connection()
     return result
+
+# Include API v1 router
+app.include_router(v1_router.router)
 
