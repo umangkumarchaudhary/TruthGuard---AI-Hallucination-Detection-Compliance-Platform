@@ -47,6 +47,10 @@ class ComplianceRuleResponse(BaseModel):
     created_at: str
     updated_at: str
 
+class TestRuleRequest(BaseModel):
+    """Request model for testing compliance rule"""
+    test_response: str = Field(..., description="Response text to test against the rule")
+
 @router.get("/compliance/rules", response_model=List[ComplianceRuleResponse])
 async def get_compliance_rules(
     organization_id: Optional[str] = Query(None),
@@ -248,7 +252,7 @@ async def get_compliance_violations(
 @router.post("/compliance/rules/{rule_id}/test")
 async def test_compliance_rule(
     rule_id: str,
-    test_response: str = Field(..., description="Response text to test"),
+    request: TestRuleRequest,
     auth_data: dict = Depends(validate_api_key)
 ):
     """
@@ -270,12 +274,12 @@ async def test_compliance_rule(
         
         rule_data = result.data[0]
         rule = parse_rule(rule_data)
-        rule_result = evaluate_rule(rule, test_response)
+        rule_result = evaluate_rule(rule, request.test_response)
         
         return {
             'rule_id': rule_id,
             'rule_name': rule.name,
-            'test_response': test_response,
+            'test_response': request.test_response,
             'passed': rule_result.passed,
             'details': rule_result.details,
             'severity': rule_result.severity

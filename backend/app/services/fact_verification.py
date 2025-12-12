@@ -3,7 +3,7 @@ Fact Verification Service
 Verifies factual claims against knowledge bases
 """
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from app.utils.supabase_client import get_supabase_client
 import httpx
 

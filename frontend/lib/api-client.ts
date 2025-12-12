@@ -28,9 +28,9 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string> || {}),
     }
 
     if (this.apiKey) {
@@ -45,7 +45,15 @@ class ApiClient {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({ detail: 'Request failed' }))
-        return { error: error.detail || 'Request failed' }
+        const errorMessage = error.detail || error.message || 'Request failed'
+        
+        // Log helpful message for 401 errors
+        if (response.status === 401) {
+          console.warn('🔑 API Key Missing:', errorMessage)
+          console.warn('💡 Solution: Set DEV_BYPASS_AUTH=true in backend/.env or create an API key')
+        }
+        
+        return { error: errorMessage }
       }
 
       const data = await response.json()

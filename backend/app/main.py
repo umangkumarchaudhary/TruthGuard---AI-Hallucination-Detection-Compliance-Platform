@@ -89,5 +89,5 @@ async def test_db():
     return result
 
 # Include API v1 router
-app.include_router(v1_router.router)
+app.include_router(v1_router)
 

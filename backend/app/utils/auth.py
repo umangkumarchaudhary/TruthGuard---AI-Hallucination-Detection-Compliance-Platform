@@ -33,10 +33,21 @@ async def validate_api_key(api_key: str = Security(api_key_header)) -> dict:
     Validate API key from request header
     Returns organization_id if valid
     """
+    # Development mode: Allow requests without API key (for local testing)
+    import os
+    dev_bypass = os.getenv("DEV_BYPASS_AUTH", "false").lower() == "true"
+    
     if not api_key:
+        if dev_bypass:
+            # Return default organization for development
+            logger.warning("⚠️  Development mode: Bypassing API key authentication")
+            return {
+                "organization_id": "00000000-0000-0000-0000-000000000001",
+                "api_key_id": None
+            }
         raise HTTPException(
             status_code=401,
-            detail="API key is required. Provide it in X-API-Key header."
+            detail="API key is required. Provide it in X-API-Key header. For development, set DEV_BYPASS_AUTH=true in backend/.env"
         )
     
     try:

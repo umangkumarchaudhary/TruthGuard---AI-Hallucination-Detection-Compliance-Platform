@@ -54,13 +54,19 @@ export default function DashboardPage() {
     try {
       // Get stats
       const statsRes = await apiClient.get<DashboardStats>('/api/v1/audit/stats?organization_id=00000000-0000-0000-0000-000000000001')
-      if (statsRes.data) {
+      if (statsRes.error) {
+        if (statsRes.error.includes('401') || statsRes.error.includes('Unauthorized')) {
+          console.warn('⚠️ API key missing. For development, set DEV_BYPASS_AUTH=true in backend/.env or create an API key.')
+        }
+      } else if (statsRes.data) {
         setStats(statsRes.data)
       }
 
       // Get recent interactions
       const interactionsRes = await apiClient.get<any[]>('/api/v1/audit/interactions?limit=5&organization_id=00000000-0000-0000-0000-000000000001')
-      if (interactionsRes.data) {
+      if (interactionsRes.error) {
+        // Error already logged above
+      } else if (interactionsRes.data) {
         setRecentInteractions(interactionsRes.data)
       }
     } catch (error) {
@@ -138,7 +144,11 @@ export default function DashboardPage() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={(props: any) => {
+                        const name = props.name || 'Unknown'
+                        const percent = props.percent || 0
+                        return `${name}: ${(percent * 100).toFixed(0)}%`
+                      }}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"

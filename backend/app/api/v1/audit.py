@@ -55,7 +55,7 @@ class AuditStatsResponse(BaseModel):
     violations_by_severity: Dict[str, int]
     avg_confidence_score: float
     interactions_by_model: Dict[str, int]
-    date_range: Dict[str, str]
+    date_range: Dict[str, str]  # start and end as strings (empty string if no data)
 
 @router.get("/interactions", response_model=List[InteractionResponse])
 async def get_interactions(
@@ -331,8 +331,8 @@ async def get_audit_stats(
         # Date range
         timestamps = [i.get('timestamp') for i in interactions if i.get('timestamp')]
         date_range = {
-            'start': min(timestamps) if timestamps else None,
-            'end': max(timestamps) if timestamps else None
+            'start': min(timestamps) if timestamps else '',
+            'end': max(timestamps) if timestamps else ''
         }
         
         return {

@@ -40,6 +40,10 @@ class PolicyResponse(BaseModel):
     created_at: str
     updated_at: str
 
+class TestPolicyRequest(BaseModel):
+    """Request model for testing policy"""
+    test_response: str = Field(..., description="Response text to test against the policy")
+
 @router.get("/policies", response_model=List[PolicyResponse])
 async def get_policies(
     organization_id: Optional[str] = Query(None),
@@ -195,7 +199,7 @@ async def delete_policy(
 @router.post("/policies/{policy_id}/test")
 async def test_policy(
     policy_id: str,
-    test_response: str = Field(..., description="Response text to test"),
+    request: TestPolicyRequest,
     auth_data: dict = Depends(validate_api_key)
 ):
     """
@@ -216,13 +220,13 @@ async def test_policy(
             raise HTTPException(status_code=404, detail="Policy not found")
         
         policy = result.data[0]
-        matches = match_policies(test_response, [policy])
+        matches = match_policies(request.test_response, [policy])
         match_result = matches[0] if matches else None
         
         return {
             'policy_id': policy_id,
             'policy_name': policy['policy_name'],
-            'test_response': test_response,
+            'test_response': request.test_response,
             'matched': match_result['matched'] if match_result else True,
             'deviation': match_result.get('deviation') if match_result else None
         }
