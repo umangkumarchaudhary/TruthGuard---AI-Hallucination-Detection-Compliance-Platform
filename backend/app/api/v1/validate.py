@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from app.services.detection import detect_hallucinations
+from app.services.correction import suggest_correction
 from app.utils.supabase_client import get_supabase_client
 from app.utils.auth import validate_api_key
 import logging
@@ -56,6 +57,8 @@ class ValidationResponse(BaseModel):
     claims: List[Dict[str, Any]]
     explanation: str
     interaction_id: Optional[str] = None
+    correction_suggested: bool = False
+    changes_made: Optional[List[str]] = None
 
 @router.post("/validate", response_model=ValidationResponse)
 async def validate_ai_response(
@@ -101,17 +104,34 @@ async def validate_ai_response(
             session_id=request.session_id
         )
         
+        # Generate correction if needed
+        corrected_response = None
+        changes_made = None
+        correction_suggested = False
+        
+        if detection_result['status'] != 'approved' and detection_result.get('violations'):
+            correction = suggest_correction(
+                original_response=request.ai_response,
+                violations=detection_result.get('violations', []),
+                query=request.query
+            )
+            corrected_response = correction.get('corrected_response')
+            changes_made = correction.get('changes_made', [])
+            correction_suggested = len(changes_made) > 0
+        
         # Prepare response
         response = ValidationResponse(
             status=detection_result['status'],
-            validated_response=request.ai_response if detection_result['status'] == 'approved' else None,
+            validated_response=corrected_response if corrected_response else (request.ai_response if detection_result['status'] == 'approved' else None),
             confidence_score=detection_result['confidence_score'],
             violations=[Violation(**v) for v in detection_result.get('violations', [])],
             verification_results=[VerificationResult(**r) for r in detection_result.get('verification_results', [])],
             citations=[Citation(**c) for c in detection_result.get('citations', [])],
             claims=detection_result.get('claims', []),
             explanation=detection_result.get('explanation', ''),
-            interaction_id=interaction_id
+            interaction_id=interaction_id,
+            correction_suggested=correction_suggested,
+            changes_made=changes_made
         )
         
         return response

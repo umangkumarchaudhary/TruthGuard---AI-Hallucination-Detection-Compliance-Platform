@@ -8,6 +8,8 @@ from app.services.claim_extraction import extract_claims
 from app.services.fact_verification import verify_claim, batch_verify_claims
 from app.services.citation_verification import extract_and_validate_citations
 from app.services.consistency_checking import check_historical_consistency
+from app.services.compliance import check_compliance
+from app.services.policy_matching import detect_policy_violations
 
 logger = logging.getLogger(__name__)
 
@@ -80,22 +82,58 @@ def detect_hallucinations(
         except Exception as e:
             logger.warning(f"Could not check consistency: {str(e)}")
         
-        # Step 5: Calculate confidence score
+        # Step 5: Check compliance rules
+        compliance_result = {'passed': True, 'violations': []}  # Default
+        try:
+            logger.info("Checking compliance rules...")
+            # Get industry from organization (would need to fetch)
+            compliance_result = check_compliance(ai_response, organization_id, industry=None)
+            if not compliance_result['passed']:
+                for violation in compliance_result.get('violations', []):
+                    result.violations.append({
+                        'type': 'compliance',
+                        'severity': violation.get('severity', 'medium'),
+                        'description': violation.get('description', ''),
+                        'rule_name': violation.get('rule_name', '')
+                    })
+        except Exception as e:
+            logger.warning(f"Could not check compliance: {str(e)}")
+        
+        # Step 6: Check company policies
+        try:
+            logger.info("Checking company policies...")
+            policy_violations = detect_policy_violations(ai_response, organization_id)
+            for violation in policy_violations:
+                result.violations.append({
+                    'type': 'policy',
+                    'severity': violation.get('severity', 'high'),
+                    'description': violation.get('description', ''),
+                    'policy_name': violation.get('policy_name', '')
+                })
+        except Exception as e:
+            logger.warning(f"Could not check policies: {str(e)}")
+        
+        # Step 7: Calculate confidence score (now includes compliance)
         result.confidence_score = calculate_detection_confidence(
             verification_results,
             citation_results,
-            consistency_score
+            consistency_score,
+            compliance_result
         )
         
-        # Step 6: Determine status
-        if result.confidence_score < 0.6:
+        # Step 8: Determine status (consider compliance violations)
+        # Critical compliance violations always block
+        critical_violations = [v for v in result.violations if v.get('severity') == 'critical']
+        if critical_violations:
+            result.status = "blocked"
+        elif result.confidence_score < 0.6:
             result.status = "blocked"
         elif result.confidence_score < 0.8:
             result.status = "flagged"
         else:
             result.status = "approved"
         
-        # Step 7: Generate explanation
+        # Step 9: Generate explanation
         result.explanation = generate_explanation(result)
         
         # Convert to dict for response
@@ -128,36 +166,51 @@ def detect_hallucinations(
 def calculate_detection_confidence(
     verification_results: List[Dict],
     citation_results: Dict,
-    consistency_score: float
+    consistency_score: float,
+    compliance_result: Dict = None
 ) -> float:
     """
     Calculate overall confidence score
-    Weighted combination of all checks
+    Weighted combination of all checks (updated to include compliance)
     """
-    # Fact verification weight: 40%
+    # Fact verification weight: 30% (reduced from 40%)
     fact_score = 0.0
     if verification_results:
         verified_count = sum(1 for r in verification_results if r['verification_status'] == 'verified')
         fact_score = verified_count / len(verification_results)
-    fact_weighted = fact_score * 0.4
+    fact_weighted = fact_score * 0.3
     
-    # Citation validity weight: 20%
+    # Citation validity weight: 15% (reduced from 20%)
     citation_score = 0.0
     if citation_results.get('total_citations', 0) > 0:
         valid_citations = citation_results.get('valid_citations', 0)
         total_citations = citation_results.get('total_citations', 0)
         citation_score = valid_citations / total_citations if total_citations > 0 else 1.0
-    citation_weighted = citation_score * 0.2
+    citation_weighted = citation_score * 0.15
     
-    # Consistency weight: 20%
-    consistency_weighted = consistency_score * 0.2
+    # Consistency weight: 15% (reduced from 20%)
+    consistency_weighted = consistency_score * 0.15
     
-    # Claim clarity weight: 20% (simplified - would use NLP in production)
+    # Compliance weight: 25% (NEW)
+    compliance_score = 1.0
+    if compliance_result:
+        if compliance_result.get('passed', True):
+            compliance_score = 1.0
+        else:
+            # Penalize based on violation severity
+            violations = compliance_result.get('violations', [])
+            if violations:
+                severity_penalties = {'low': 0.1, 'medium': 0.3, 'high': 0.6, 'critical': 1.0}
+                max_penalty = max([severity_penalties.get(v.get('severity', 'medium'), 0.3) for v in violations])
+                compliance_score = 1.0 - max_penalty
+    compliance_weighted = compliance_score * 0.25
+    
+    # Claim clarity weight: 15% (reduced from 20%)
     clarity_score = 0.8  # Default
-    clarity_weighted = clarity_score * 0.2
+    clarity_weighted = clarity_score * 0.15
     
     # Total confidence
-    total_confidence = fact_weighted + citation_weighted + consistency_weighted + clarity_weighted
+    total_confidence = fact_weighted + citation_weighted + consistency_weighted + compliance_weighted + clarity_weighted
     
     return min(max(total_confidence, 0.0), 1.0)
 

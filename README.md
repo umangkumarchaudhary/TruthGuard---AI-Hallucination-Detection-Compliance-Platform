@@ -73,6 +73,7 @@ TruthGuard/
 **See completion reports:**
 - **[PHASE_1_COMPLETION.md](./PHASE_1_COMPLETION.md)** - Foundation & Infrastructure
 - **[PHASE_2_COMPLETION.md](./PHASE_2_COMPLETION.md)** - Core Detection Engine
+- **[PHASE_3_COMPLETION.md](./PHASE_3_COMPLETION.md)** - Compliance & Policy Engine
 
 **Each includes:**
 - What was built
@@ -84,20 +85,29 @@ TruthGuard/
 
 - ✅ Phase 1: Foundation & Infrastructure - **COMPLETE**
 - ✅ Phase 2: Core Detection Engine - **COMPLETE**
-- ⏳ Phase 3: Compliance & Policy Engine - Next
-- ⏳ Phase 4: Audit Trail & Logging
+- ✅ Phase 3: Compliance & Policy Engine - **COMPLETE**
+- ⏳ Phase 4: Audit Trail & Logging - Next
 - ⏳ Phase 5: Frontend Dashboard
 - ⏳ Phase 6: Integration & Testing
 
-**Overall Progress: 44% (28/64 steps)**
+**Overall Progress: 63% (40/64 steps)**
 
 ## 🔗 Key Endpoints
 
+### Core API
 - `GET /` - API info
 - `GET /health` - Health check
 - `GET /test-db` - Database connection test
 - `GET /api/v1/info` - API version info
 - `POST /api/v1/validate` - **Validate AI responses** (Main endpoint)
+
+### Compliance & Policies
+- `GET /api/v1/compliance/rules` - List compliance rules
+- `POST /api/v1/compliance/rules` - Create rule
+- `GET /api/v1/policies` - List company policies
+- `POST /api/v1/policies` - Create policy
+
+### Documentation
 - `GET /docs` - Swagger UI (FastAPI)
 
 ## 🛠️ Tech Stack
