@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from app.services.detection import detect_hallucinations
 from app.services.correction import suggest_correction
+from app.services.audit import AuditLogger
+from app.services.explanation import generate_explanation
 from app.utils.supabase_client import get_supabase_client
 from app.utils.auth import validate_api_key
 import logging
@@ -94,16 +96,6 @@ async def validate_ai_response(
             ai_model=request.ai_model
         )
         
-        # Save to database
-        interaction_id = await save_detection_results(
-            organization_id=organization_id,
-            query=request.query,
-            ai_response=request.ai_response,
-            detection_result=detection_result,
-            ai_model=request.ai_model,
-            session_id=request.session_id
-        )
-        
         # Generate correction if needed
         corrected_response = None
         changes_made = None
@@ -119,6 +111,28 @@ async def validate_ai_response(
             changes_made = correction.get('changes_made', [])
             correction_suggested = len(changes_made) > 0
         
+        # Generate explanation
+        explanation = generate_explanation(
+            detection_result,
+            request.query,
+            request.ai_response
+        )
+        detection_result['explanation'] = explanation
+        
+        # Comprehensive audit logging
+        interaction_id = await AuditLogger.log_interaction(
+            organization_id=organization_id,
+            query=request.query,
+            ai_response=request.ai_response,
+            validated_response=corrected_response if corrected_response else (request.ai_response if detection_result['status'] == 'approved' else None),
+            status=detection_result['status'],
+            confidence_score=detection_result['confidence_score'],
+            ai_model=request.ai_model,
+            session_id=request.session_id,
+            detection_result=detection_result,
+            explanation=explanation
+        )
+        
         # Prepare response
         response = ValidationResponse(
             status=detection_result['status'],
@@ -128,7 +142,7 @@ async def validate_ai_response(
             verification_results=[VerificationResult(**r) for r in detection_result.get('verification_results', [])],
             citations=[Citation(**c) for c in detection_result.get('citations', [])],
             claims=detection_result.get('claims', []),
-            explanation=detection_result.get('explanation', ''),
+            explanation=explanation,
             interaction_id=interaction_id,
             correction_suggested=correction_suggested,
             changes_made=changes_made
