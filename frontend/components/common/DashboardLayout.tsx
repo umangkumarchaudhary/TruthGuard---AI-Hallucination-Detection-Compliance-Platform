@@ -13,7 +13,7 @@ import {
   Settings,
   Menu,
   X,
-  TestTube
+  Sparkles
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -22,7 +22,7 @@ interface DashboardLayoutProps {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Test', href: '/test', icon: TestTube },
+  { name: 'AI Test', href: '/ai-test', icon: Sparkles },
   { name: 'Interactions', href: '/interactions', icon: MessageSquare },
   { name: 'Violations', href: '/violations', icon: AlertTriangle },
   { name: 'Policies', href: '/policies', icon: FileText },

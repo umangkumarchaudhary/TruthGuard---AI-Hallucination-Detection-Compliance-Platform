@@ -21,6 +21,12 @@ class Settings:
     # Application Configuration
     ENVIRONMENT: str = os.getenv("NODE_ENV", "development")
     
+    # Real-Time Verification APIs (optional)
+    NEWSAPI_KEY: str = os.getenv("NEWSAPI_KEY", "")
+    
+    # Google Gemini Pro API (optional - for AI response generation)
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    
     @property
     def is_development(self) -> bool:
         return self.ENVIRONMENT == "development"

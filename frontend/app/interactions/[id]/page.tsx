@@ -6,6 +6,15 @@ import DashboardLayout from '@/components/common/DashboardLayout'
 import { apiClient } from '@/lib/api-client'
 import { ArrowLeft, AlertTriangle, CheckCircle, XCircle, ExternalLink } from 'lucide-react'
 
+interface ConfidenceBreakdown {
+  score: number
+  weight: number
+  weighted_score: number
+  label: string
+  description: string
+  details: Record<string, any>
+}
+
 interface InteractionDetail {
   interaction: {
     id: string
@@ -14,6 +23,17 @@ interface InteractionDetail {
     validated_response?: string
     status: string
     confidence_score: number
+    confidence_breakdown?: {
+      fact_verification?: ConfidenceBreakdown
+      citation_validity?: ConfidenceBreakdown
+      consistency?: ConfidenceBreakdown
+      compliance?: ConfidenceBreakdown
+      response_clarity?: ConfidenceBreakdown
+      contributions?: {
+        positive_factors: string[]
+        negative_factors: string[]
+      }
+    }
     ai_model?: string
     timestamp: string
   }
@@ -28,6 +48,9 @@ interface InteractionDetail {
     claim_text: string
     verification_status: string
     confidence: number
+    source?: string | null
+    details?: string | null
+    url?: string | null
   }>
   citations: Array<{
     id: string
@@ -181,22 +204,65 @@ export default function InteractionDetailPage() {
         {verification_results.length > 0 && (
           <div className="bg-white border border-[#e5e5e5] p-6 mb-6">
             <h3 className="text-lg font-semibold text-black mb-4">Fact Verification</h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {verification_results.map((result) => (
-                <div key={result.id} className="flex items-start gap-3 p-3 border border-[#e5e5e5]">
-                  {result.verification_status === 'verified' ? (
-                    <CheckCircle className="text-[#10b981] flex-shrink-0" size={20} />
-                  ) : result.verification_status === 'false' ? (
-                    <XCircle className="text-[#dc2626] flex-shrink-0" size={20} />
-                  ) : (
-                    <AlertTriangle className="text-[#f59e0b] flex-shrink-0" size={20} />
-                  )}
-                  <div className="flex-1">
-                    <p className="text-sm text-black">{result.claim_text}</p>
-                    <p className="text-xs text-black/60 mt-1">
-                      Status: {result.verification_status} | Confidence: {(result.confidence * 100).toFixed(0)}%
-                    </p>
+                <div key={result.id} className="border border-[#e5e5e5] p-4">
+                  <div className="flex items-start gap-3 mb-2">
+                    {result.verification_status === 'verified' ? (
+                      <CheckCircle className="text-[#10b981] flex-shrink-0 mt-0.5" size={20} />
+                    ) : result.verification_status === 'false' ? (
+                      <XCircle className="text-[#dc2626] flex-shrink-0 mt-0.5" size={20} />
+                    ) : (
+                      <AlertTriangle className="text-[#f59e0b] flex-shrink-0 mt-0.5" size={20} />
+                    )}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-black mb-1">{result.claim_text}</p>
+                      <div className="flex items-center gap-3 flex-wrap mt-2">
+                        <span className={`text-xs font-medium px-2 py-1 ${
+                          result.verification_status === 'verified' 
+                            ? 'bg-[#10b981]/10 text-[#10b981]' 
+                            : result.verification_status === 'false'
+                            ? 'bg-[#dc2626]/10 text-[#dc2626]'
+                            : 'bg-[#f59e0b]/10 text-[#f59e0b]'
+                        }`}>
+                          {result.verification_status.toUpperCase()}
+                        </span>
+                        <span className="text-xs text-black/60">
+                          Confidence: {(result.confidence * 100).toFixed(0)}%
+                        </span>
+                        {result.source && (
+                          <span className="text-xs text-black/60">
+                            Source: <span className="font-medium capitalize">{result.source}</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                  
+                  {/* Source Details */}
+                  {result.details && (
+                    <div className="mt-3 pt-3 border-t border-[#e5e5e5]">
+                      <p className="text-xs text-black/80 mb-2">
+                        <span className="font-medium">Verification Details:</span>
+                      </p>
+                      <p className="text-xs text-black/70 leading-relaxed">{result.details}</p>
+                    </div>
+                  )}
+                  
+                  {/* Source URL */}
+                  {result.url && (
+                    <div className="mt-2">
+                      <a
+                        href={result.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-black/60 hover:text-black flex items-center gap-1"
+                      >
+                        View source
+                        <ExternalLink size={12} />
+                      </a>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

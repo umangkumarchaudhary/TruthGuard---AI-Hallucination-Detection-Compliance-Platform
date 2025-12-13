@@ -85,11 +85,15 @@ def check_historical_consistency(query: str, organization_id: str, current_respo
             .execute()
         
         if not result.data or len(result.data) < 1:
-            return 0.7  # Default if no history - don't penalize
+            # No historical data - don't penalize, return high score
+            logger.debug("No historical data available - returning high consistency score")
+            return 0.9  # High score when no data (don't penalize for first-time queries)
         
         # Need at least 2 historical responses to make a meaningful comparison
         if len(result.data) < 2:
-            return 0.6  # If only 1 historical response, be lenient
+            # Only 1 historical response - be very lenient
+            logger.debug("Only 1 historical response - being lenient")
+            return 0.8  # High score when little data
         
         historical_responses = [r['ai_response'] for r in result.data]
         historical_responses.append(current_response)
@@ -98,14 +102,20 @@ def check_historical_consistency(query: str, organization_id: str, current_respo
         
         # If consistency is very low but we have few historical responses, be more lenient
         # Low score might just mean responses are different, not wrong
-        if consistency_score < 0.3 and len(result.data) < 3:
-            return 0.5  # Boost low scores when we have little data
+        if consistency_score < 0.2:
+            # Very low score - likely means no similar queries, not actual inconsistency
+            if len(result.data) < 3:
+                logger.debug(f"Very low consistency ({consistency_score:.2f}) with few historical responses - boosting score")
+                return 0.7  # Boost significantly when we have little data
+            else:
+                # Even with more data, very low scores might mean different query types
+                return max(consistency_score, 0.4)  # Minimum 0.4 to avoid extreme penalties
         
         return consistency_score
         
     except Exception as e:
         logger.error(f"Error checking historical consistency: {str(e)}")
-        return 0.6  # More lenient default
+        return 0.8  # High default on error (don't penalize for errors)
 
 def detect_contradictions(responses: List[str]) -> List[Dict[str, Any]]:
     """

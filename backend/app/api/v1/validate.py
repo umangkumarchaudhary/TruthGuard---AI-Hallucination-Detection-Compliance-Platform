@@ -48,11 +48,21 @@ class Citation(BaseModel):
     http_status_code: Optional[int] = None
     error_message: Optional[str] = None
 
+class ConfidenceBreakdown(BaseModel):
+    """Confidence score breakdown component"""
+    score: float
+    weight: float
+    weighted_score: float
+    label: str
+    description: str
+    details: Dict[str, Any]
+
 class ValidationResponse(BaseModel):
     """Response model for validation endpoint"""
     status: str  # approved, flagged, blocked
     validated_response: Optional[str] = None
     confidence_score: float
+    confidence_breakdown: Optional[Dict[str, ConfidenceBreakdown]] = None
     violations: List[Violation]
     verification_results: List[VerificationResult]
     citations: List[Citation]
@@ -88,8 +98,8 @@ async def validate_ai_response(
         
         logger.info(f"Validating AI response for organization {organization_id}")
         
-        # Run detection pipeline
-        detection_result = detect_hallucinations(
+        # Run detection pipeline (now async with real-time verification)
+        detection_result = await detect_hallucinations(
             query=request.query,
             ai_response=request.ai_response,
             organization_id=organization_id,

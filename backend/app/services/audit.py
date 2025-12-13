@@ -145,6 +145,24 @@ class AuditLogger:
             supabase = get_supabase_client()
             
             for verification in verification_results:
+                # Store details and url in verification_method field as JSON if needed
+                # Or we can add them as separate fields if the schema supports it
+                details = verification.get('details', '')
+                url = verification.get('url', '')
+                
+                # Store additional info in verification_method (we'll parse it later)
+                # Or better: try to store in a JSON field if available
+                verification_method = verification.get('verification_method', 'api_call')
+                if details or url:
+                    # Store as JSON string in verification_method for now
+                    import json
+                    method_data = {
+                        'method': verification_method,
+                        'details': details,
+                        'url': url
+                    }
+                    verification_method = json.dumps(method_data)
+                
                 verification_data = {
                     'id': str(uuid.uuid4()),
                     'interaction_id': interaction_id,
@@ -152,6 +170,7 @@ class AuditLogger:
                     'verification_status': verification.get('verification_status', 'unverified'),
                     'source': verification.get('source'),
                     'confidence': verification.get('confidence', 0.0),
+                    'verification_method': verification_method,
                     'created_at': datetime.utcnow().isoformat()
                 }
                 
@@ -258,6 +277,21 @@ class AuditLogger:
             # Get verification results
             verifications_result = supabase.table('verification_results').select('*').eq('interaction_id', interaction_id).execute()
             verifications = verifications_result.data if verifications_result.data else []
+            
+            # Parse verification_method JSON to extract details and url
+            import json
+            for verification in verifications:
+                method_data = verification.get('verification_method', '')
+                if method_data:
+                    try:
+                        # Try to parse as JSON
+                        parsed = json.loads(method_data)
+                        if isinstance(parsed, dict):
+                            verification['details'] = parsed.get('details', '')
+                            verification['url'] = parsed.get('url', '')
+                    except (json.JSONDecodeError, TypeError):
+                        # If not JSON, keep original value
+                        pass
             
             # Get citations
             citations_result = supabase.table('citations').select('*').eq('interaction_id', interaction_id).execute()

@@ -1,10 +1,12 @@
 """
 Fact Verification Service
 Verifies factual claims against knowledge bases
+Now includes real-time verification via Wikipedia, DuckDuckGo, and NewsAPI
 """
 import logging
 from typing import Dict, Any, Optional, List
 from app.utils.supabase_client import get_supabase_client
+from app.services.real_time_verification import verify_claim_realtime
 import httpx
 
 logger = logging.getLogger(__name__)
@@ -20,10 +22,18 @@ class VerificationResult:
 # In-memory cache for verified facts (simple implementation)
 fact_cache: Dict[str, VerificationResult] = {}
 
-def verify_claim(claim: str, claim_type: str = "factual") -> Dict[str, Any]:
+async def verify_claim(claim: str, claim_type: str = "factual", use_realtime: bool = True, query_context: Optional[str] = None) -> Dict[str, Any]:
     """
     Verify a claim against knowledge bases
-    Returns verification result
+    Now uses real-time APIs (Wikipedia, DuckDuckGo, NewsAPI) for verification
+    
+    Args:
+        claim: The claim to verify
+        claim_type: Type of claim (factual, statistical, etc.)
+        use_realtime: If True, uses real-time APIs; if False, uses legacy methods
+        
+    Returns:
+        Verification result dict with status, confidence, source, and details
     """
     if not claim:
         return {
@@ -46,6 +56,22 @@ def verify_claim(claim: str, claim_type: str = "factual") -> Dict[str, Any]:
                 'details': cached.details
             }
         
+        # Use real-time verification (default)
+        if use_realtime:
+            logger.info(f"Verifying claim via real-time APIs: {claim[:50]}...")
+            realtime_result = await verify_claim_realtime(claim, use_all_sources=True, query_context=query_context)
+            
+            # Cache the result
+            fact_cache[cache_key] = VerificationResult(
+                status=realtime_result['status'],
+                confidence=realtime_result['confidence'],
+                source=realtime_result.get('source'),
+                details=realtime_result.get('details')
+            )
+            
+            return realtime_result
+        
+        # Legacy path (fallback if realtime is disabled)
         # Try database lookup first (for known facts)
         db_result = verify_via_database(claim)
         if db_result and db_result['status'] == 'verified':
@@ -58,21 +84,10 @@ def verify_claim(claim: str, claim_type: str = "factual") -> Dict[str, Any]:
             )
             return db_result
         
-        # Try Wikipedia API (simplified - actual implementation would use Wikipedia API)
-        wiki_result = verify_via_wikipedia(claim)
-        if wiki_result:
-            fact_cache[cache_key] = VerificationResult(
-                status=wiki_result['status'],
-                confidence=wiki_result['confidence'],
-                source='wikipedia',
-                details=wiki_result.get('details')
-            )
-            return wiki_result
-        
         # Default: unverified
         result = {
             'status': 'unverified',
-            'confidence': 0.3,
+            'confidence': 0.5,  # Changed from 0.3 to 0.5 (less penalizing)
             'source': None,
             'details': 'Could not verify claim against available sources'
         }
@@ -108,31 +123,12 @@ def verify_via_database(claim: str) -> Optional[Dict[str, Any]]:
 
 def verify_via_wikipedia(claim: str) -> Optional[Dict[str, Any]]:
     """
-    Verify claim via Wikipedia API (simplified implementation)
-    In production, use actual Wikipedia API
+    Legacy Wikipedia verification (deprecated - use real_time_verification instead)
+    Kept for backward compatibility
     """
-    try:
-        # Simplified: Check if claim contains common factual patterns
-        # In production, you'd use Wikipedia API or similar service
-        
-        # For demo: If claim has specific factual indicators, mark as potentially verified
-        factual_indicators = ['according to', 'research shows', 'data indicates', 'study found']
-        claim_lower = claim.lower()
-        
-        for indicator in factual_indicators:
-            if indicator in claim_lower:
-                return {
-                    'status': 'partially_verified',
-                    'confidence': 0.6,
-                    'source': 'pattern_match',
-                    'details': 'Claim contains factual indicators but needs manual verification'
-                }
-        
-        return None
-        
-    except Exception as e:
-        logger.error(f"Wikipedia verification error: {str(e)}")
-        return None
+    # This is now handled by real_time_verification.py
+    # Keeping for backward compatibility
+    return None
 
 def verify_via_semantic_similarity(claim: str, known_facts: List[str]) -> Optional[Dict[str, Any]]:
     """
@@ -143,13 +139,15 @@ def verify_via_semantic_similarity(claim: str, known_facts: List[str]) -> Option
     # In production, use sentence-transformers to compare embeddings
     return None
 
-def batch_verify_claims(claims: List[str]) -> List[Dict[str, Any]]:
+async def batch_verify_claims(claims: List[str], use_realtime: bool = True) -> List[Dict[str, Any]]:
     """
     Verify multiple claims efficiently
+    Now supports async real-time verification
     """
-    results = []
-    for claim in claims:
-        result = verify_claim(claim)
-        results.append(result)
+    import asyncio
+    
+    # Verify all claims concurrently
+    tasks = [verify_claim(claim, use_realtime=use_realtime) for claim in claims]
+    results = await asyncio.gather(*tasks)
     return results
 

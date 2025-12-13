@@ -6,10 +6,30 @@ import DashboardLayout from '@/components/common/DashboardLayout'
 import { apiClient } from '@/lib/api-client'
 import { CheckCircle, XCircle, AlertTriangle, Loader2, ExternalLink } from 'lucide-react'
 
+interface ConfidenceBreakdown {
+  score: number
+  weight: number
+  weighted_score: number
+  label: string
+  description: string
+  details: Record<string, any>
+}
+
 interface ValidationResponse {
   status: 'approved' | 'flagged' | 'blocked'
   validated_response?: string
   confidence_score: number
+  confidence_breakdown?: {
+    fact_verification?: ConfidenceBreakdown
+    citation_validity?: ConfidenceBreakdown
+    consistency?: ConfidenceBreakdown
+    compliance?: ConfidenceBreakdown
+    response_clarity?: ConfidenceBreakdown
+    contributions?: {
+      positive_factors: string[]
+      negative_factors: string[]
+    }
+  }
   violations: Array<{
     type: string
     severity: string
@@ -20,6 +40,8 @@ interface ValidationResponse {
     verification_status: string
     confidence: number
     source?: string
+    details?: string
+    url?: string
   }>
   citations: Array<{
     url: string
@@ -223,6 +245,119 @@ export default function TestPage() {
                   </div>
                 </div>
 
+                {/* Confidence Score Breakdown */}
+                {result.confidence_breakdown && (
+                  <div className="border border-[#e5e5e5]">
+                    <h3 className="text-sm font-semibold text-black p-4 bg-[#f5f5f5] border-b border-[#e5e5e5] flex items-center gap-2">
+                      <span>📊</span>
+                      Score Breakdown
+                    </h3>
+                    <div className="p-6 bg-white space-y-5">
+                      {/* Overall Score */}
+                      <div className="pb-4 border-b border-[#e5e5e5]">
+                        <div className="flex items-baseline justify-between mb-2">
+                          <p className="text-sm font-semibold text-black">Overall Confidence Score</p>
+                          <p className="text-3xl font-bold text-black">
+                            {(result.confidence_score * 100).toFixed(0)}%
+                          </p>
+                        </div>
+                        <div className="w-full h-2 bg-[#e5e5e5] mt-3">
+                          <div
+                            className="h-full bg-black transition-all"
+                            style={{ width: `${result.confidence_score * 100}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Component Breakdowns */}
+                      {Object.entries(result.confidence_breakdown)
+                        .filter(([key]) => key !== 'contributions')
+                        .map(([key, component]: [string, any]) => {
+                          if (!component || typeof component !== 'object' || !component.score) return null
+                          
+                          const scorePercent = component.score * 100
+                          const weightPercent = component.weight * 100
+                          const getScoreColor = (score: number) => {
+                            if (score >= 0.8) return 'bg-[#10b981]'
+                            if (score >= 0.6) return 'bg-[#3b82f6]'
+                            if (score >= 0.4) return 'bg-[#f59e0b]'
+                            return 'bg-[#dc2626]'
+                          }
+
+                          return (
+                            <div key={key} className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <p className="text-sm font-semibold text-black mb-1">
+                                    {component.label}
+                                  </p>
+                                  <p className="text-xs text-black/60">{component.description}</p>
+                                </div>
+                                <div className="text-right ml-4">
+                                  <p className="text-lg font-bold text-black">
+                                    {scorePercent.toFixed(0)}%
+                                  </p>
+                                  <p className="text-xs text-black/40">
+                                    {weightPercent.toFixed(0)}% weight
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="w-full h-3 bg-[#e5e5e5]">
+                                <div
+                                  className={`h-full ${getScoreColor(component.score)} transition-all`}
+                                  style={{ width: `${scorePercent}%` }}
+                                />
+                              </div>
+                              {component.details && Object.keys(component.details).length > 0 && (
+                                <div className="mt-2 pt-2 border-t border-[#e5e5e5]">
+                                  <div className="flex flex-wrap gap-3 text-xs text-black/60">
+                                    {Object.entries(component.details).map(([detailKey, detailValue]: [string, any]) => (
+                                      <span key={detailKey}>
+                                        <span className="font-medium">{detailKey.replace(/_/g, ' ')}:</span> {String(detailValue)}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+
+                      {/* Contributions */}
+                      {result.confidence_breakdown.contributions && (
+                        <div className="pt-4 border-t border-[#e5e5e5] space-y-3">
+                          {result.confidence_breakdown.contributions.positive_factors?.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold text-[#10b981] mb-2">✅ Positive Factors</p>
+                              <ul className="space-y-1">
+                                {result.confidence_breakdown.contributions.positive_factors.map((factor: string, idx: number) => (
+                                  <li key={idx} className="text-xs text-black/70 flex items-start gap-2">
+                                    <span className="text-[#10b981] mt-0.5">•</span>
+                                    <span>{factor}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {result.confidence_breakdown.contributions.negative_factors?.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold text-[#f59e0b] mb-2">⚠️ Areas for Improvement</p>
+                              <ul className="space-y-1">
+                                {result.confidence_breakdown.contributions.negative_factors.map((factor: string, idx: number) => (
+                                  <li key={idx} className="text-xs text-black/70 flex items-start gap-2">
+                                    <span className="text-[#f59e0b] mt-0.5">•</span>
+                                    <span>{factor}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Violations */}
                 {result.violations.length > 0 && (
                   <div>
@@ -280,20 +415,41 @@ export default function TestPage() {
                     <h3 className="text-sm font-semibold text-black mb-2">Claim Verification</h3>
                     <div className="space-y-2">
                       {result.verification_results.slice(0, 3).map((vr, idx) => (
-                        <div key={idx} className="p-3 bg-[#f5f5f5]">
-                          <p className="text-xs text-black/80 mb-1">{vr.claim_text}</p>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs font-medium ${
-                              vr.verification_status === 'verified' ? 'text-[#10b981]' : 
-                              vr.verification_status === 'unverified' ? 'text-[#f59e0b]' : 
-                              'text-[#dc2626]'
+                        <div key={idx} className="p-3 bg-[#f5f5f5] border border-[#e5e5e5]">
+                          <p className="text-xs font-medium text-black mb-2">{vr.claim_text}</p>
+                          <div className="flex items-center gap-2 flex-wrap mb-2">
+                            <span className={`text-xs font-medium px-2 py-0.5 ${
+                              vr.verification_status === 'verified' ? 'bg-[#10b981]/10 text-[#10b981]' : 
+                              vr.verification_status === 'unverified' ? 'bg-[#f59e0b]/10 text-[#f59e0b]' : 
+                              'bg-[#dc2626]/10 text-[#dc2626]'
                             }`}>
                               {vr.verification_status.toUpperCase()}
                             </span>
                             <span className="text-xs text-black/60">
                               {(vr.confidence * 100).toFixed(0)}% confidence
                             </span>
+                            {(vr as any).source && (
+                              <span className="text-xs text-black/60">
+                                Source: <span className="font-medium capitalize">{(vr as any).source}</span>
+                              </span>
+                            )}
                           </div>
+                          {(vr as any).details && (
+                            <p className="text-xs text-black/70 mt-2 leading-relaxed">
+                              {(vr as any).details.substring(0, 150)}
+                              {(vr as any).details.length > 150 ? '...' : ''}
+                            </p>
+                          )}
+                          {(vr as any).url && (
+                            <a
+                              href={(vr as any).url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-black/60 hover:text-black mt-2 inline-flex items-center gap-1"
+                            >
+                              View source <ExternalLink size={12} />
+                            </a>
+                          )}
                         </div>
                       ))}
                     </div>
