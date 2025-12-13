@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import DashboardLayout from '@/components/common/DashboardLayout'
+import BusinessImpactCard from '@/components/dashboard/BusinessImpactCard'
 import { apiClient } from '@/lib/api-client'
 import { 
   MessageSquare, 
@@ -38,10 +39,24 @@ interface DashboardStats {
   interactions_by_model: Record<string, number>
 }
 
+interface BusinessImpactData {
+  hallucinations_blocked: number
+  critical_violations_prevented: number
+  legal_risk_savings: number
+  brand_damage_savings: number
+  total_savings: number
+  period: string
+  config: {
+    lawsuit_cost: number
+    brand_incident_cost: number
+  }
+}
+
 const COLORS = ['#000000', '#dc2626', '#f59e0b', '#3b82f6', '#10b981']
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [businessImpact, setBusinessImpact] = useState<BusinessImpactData | null>(null)
   const [loading, setLoading] = useState(true)
   const [recentInteractions, setRecentInteractions] = useState<any[]>([])
 
@@ -68,6 +83,14 @@ export default function DashboardPage() {
         // Error already logged above
       } else if (interactionsRes.data) {
         setRecentInteractions(interactionsRes.data)
+      }
+
+      // Get business impact metrics
+      const impactRes = await apiClient.get<BusinessImpactData>('/api/v1/audit/business-impact?organization_id=00000000-0000-0000-0000-000000000001')
+      if (impactRes.error) {
+        console.warn('Could not load business impact data:', impactRes.error)
+      } else if (impactRes.data) {
+        setBusinessImpact(impactRes.data)
       }
     } catch (error) {
       console.error('Error loading dashboard data:', error)
@@ -105,6 +128,13 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
+            {/* Business Impact Card - Prominent */}
+            {businessImpact && (
+              <div className="mb-8">
+                <BusinessImpactCard data={businessImpact} loading={false} />
+              </div>
+            )}
+
             {/* Metrics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <MetricCard

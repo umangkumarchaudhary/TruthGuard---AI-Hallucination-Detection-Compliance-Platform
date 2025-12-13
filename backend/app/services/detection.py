@@ -48,6 +48,9 @@ async def detect_hallucinations(
         logger.info(f"Verifying {len(claims)} claims via real-time APIs...")
         verification_results = []
         
+        # Track false verifications for severity assignment
+        false_verifications = []
+        
         # Verify all claims concurrently for better performance
         # Pass query context to help disambiguate (e.g., "python in programming" vs "python snake")
         import asyncio
@@ -69,9 +72,11 @@ async def detect_hallucinations(
             
             # If verification marked claim as false (context mismatch or incorrect), add violation
             if verification['status'] == 'false':
+                # Enhanced severity assignment based on claim content
+                severity = assign_hallucination_severity(claim['text'], query, ai_response)
                 result.violations.append({
                     'type': 'hallucination',
-                    'severity': 'high',
+                    'severity': severity,
                     'description': f"Claim verified as incorrect: {claim['text']}. {verification.get('details', 'Context mismatch or factually incorrect.')}"
                 })
         
@@ -86,7 +91,7 @@ async def detect_hallucinations(
         if citation_results.get('fake_citations', 0) > 0:
             result.violations.append({
                 'type': 'citation',
-                'severity': 'high',
+                'severity': 'high',  # Fake citations are always high severity
                 'description': f"Found {citation_results['fake_citations']} invalid/fake citations"
             })
         
@@ -120,9 +125,11 @@ async def detect_hallucinations(
             compliance_result = check_compliance(ai_response, organization_id, industry=None)
             if not compliance_result['passed']:
                 for violation in compliance_result.get('violations', []):
+                    # Enhanced severity assignment for compliance violations
+                    severity = assign_compliance_severity(violation, ai_response)
                     result.violations.append({
                         'type': 'compliance',
-                        'severity': violation.get('severity', 'medium'),
+                        'severity': severity,
                         'description': violation.get('description', ''),
                         'rule_name': violation.get('rule_name', '')
                     })
@@ -134,9 +141,11 @@ async def detect_hallucinations(
             logger.info("Checking company policies...")
             policy_violations = detect_policy_violations(ai_response, organization_id)
             for violation in policy_violations:
+                # Enhanced severity assignment for policy violations
+                severity = assign_policy_severity(violation, ai_response)
                 result.violations.append({
                     'type': 'policy',
-                    'severity': violation.get('severity', 'high'),
+                    'severity': severity,
                     'description': violation.get('description', ''),
                     'policy_name': violation.get('policy_name', '')
                 })
@@ -428,4 +437,78 @@ def generate_explanation(result: DetectionResult) -> str:
         explanation_parts.append(f"Validated {valid}/{len(result.citations)} citations.")
     
     return " ".join(explanation_parts)
+
+def assign_hallucination_severity(claim_text: str, query: str, ai_response: str) -> str:
+    """
+    Assign severity level to hallucination violations based on content
+    Returns: 'critical', 'high', 'medium', or 'low'
+    """
+    claim_lower = claim_text.lower()
+    query_lower = query.lower()
+    response_lower = ai_response.lower()
+    
+    # Critical: Medical, financial, or legal misinformation
+    critical_keywords = [
+        'medical', 'health', 'diagnosis', 'treatment', 'prescription', 'drug', 'medicine',
+        'financial', 'investment', 'stock', 'crypto', 'trading', 'money', 'loan', 'credit',
+        'legal', 'lawsuit', 'court', 'law', 'regulation', 'compliance', 'fda', 'sec'
+    ]
+    
+    if any(keyword in claim_lower or keyword in response_lower for keyword in critical_keywords):
+        return 'critical'
+    
+    # High: Factual errors about important topics
+    high_keywords = [
+        'invented', 'created', 'founded', 'discovered', 'died', 'born', 'president', 'ceo',
+        'company', 'organization', 'government', 'country', 'capital', 'population'
+    ]
+    
+    if any(keyword in claim_lower for keyword in high_keywords):
+        return 'high'
+    
+    # Medium: General factual errors
+    return 'medium'
+
+def assign_compliance_severity(violation: Dict[str, Any], ai_response: str) -> str:
+    """
+    Assign severity level to compliance violations
+    Returns: 'critical', 'high', 'medium', or 'low'
+    """
+    description = violation.get('description', '').lower()
+    rule_name = violation.get('rule_name', '').lower()
+    response_lower = ai_response.lower()
+    
+    # Critical: Regulatory violations (SEC, FDA, GDPR, etc.)
+    critical_rules = ['sec', 'fda', 'gdpr', 'hipaa', 'sox', 'regulatory', 'compliance']
+    if any(rule in rule_name or rule in description for rule in critical_rules):
+        return 'critical'
+    
+    # High: Financial or legal advice without disclaimers
+    if 'financial' in description or 'legal' in description or 'investment' in description:
+        if 'disclaimer' not in response_lower and 'not financial advice' not in response_lower:
+            return 'high'
+    
+    # Medium: General compliance issues
+    return violation.get('severity', 'medium')
+
+def assign_policy_severity(violation: Dict[str, Any], ai_response: str) -> str:
+    """
+    Assign severity level to policy violations
+    Returns: 'critical', 'high', 'medium', or 'low'
+    """
+    description = violation.get('description', '').lower()
+    policy_name = violation.get('policy_name', '').lower()
+    response_lower = ai_response.lower()
+    
+    # Critical: Policy violations that could lead to legal issues
+    if 'guarantee' in description or 'promise' in description:
+        if 'refund' in policy_name or 'money' in description:
+            return 'critical'
+    
+    # High: Policy contradictions (always/never mismatches)
+    if 'contradicts' in description or 'always' in description or 'never' in description:
+        return 'high'
+    
+    # Medium: General policy misalignments
+    return violation.get('severity', 'medium')
 

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/common/DashboardLayout'
+import SeverityBadge from '@/components/common/SeverityBadge'
+import ResponseComparison from '@/components/comparison/ResponseComparison'
 import { apiClient } from '@/lib/api-client'
 import { ArrowLeft, AlertTriangle, CheckCircle, XCircle, ExternalLink } from 'lucide-react'
 
@@ -171,8 +173,21 @@ export default function InteractionDetailPage() {
           </div>
         </div>
 
-        {/* Validated Response */}
-        {interaction.validated_response && (
+        {/* Side-by-Side Comparison */}
+        {interaction.validated_response && 
+         interaction.validated_response.trim() !== interaction.ai_response.trim() && 
+         violations.length > 0 && (
+          <ResponseComparison
+            originalResponse={interaction.ai_response}
+            correctedResponse={interaction.validated_response}
+            violations={violations}
+            verificationResults={verification_results}
+          />
+        )}
+
+        {/* Validated Response (fallback if no comparison shown) */}
+        {interaction.validated_response && 
+         (interaction.validated_response.trim() === interaction.ai_response.trim() || violations.length === 0) && (
           <div className="bg-white border border-[#e5e5e5] p-6 mb-6">
             <h3 className="text-lg font-semibold text-black mb-4">Validated Response</h3>
             <p className="text-sm text-black whitespace-pre-wrap">{interaction.validated_response}</p>
@@ -329,18 +344,4 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-function SeverityBadge({ severity }: { severity: string }) {
-  const colors = {
-    critical: 'bg-[#dc2626] text-white',
-    high: 'bg-[#f59e0b] text-white',
-    medium: 'bg-[#3b82f6] text-white',
-    low: 'bg-[#10b981] text-white',
-  }
-
-  return (
-    <span className={`px-2 py-0.5 text-xs font-medium ${colors[severity as keyof typeof colors] || 'bg-black text-white'}`}>
-      {severity.toUpperCase()}
-    </span>
-  )
-}
 

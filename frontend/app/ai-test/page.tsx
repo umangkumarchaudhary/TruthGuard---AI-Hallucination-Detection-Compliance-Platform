@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/common/DashboardLayout'
+import ResponseComparison from '@/components/comparison/ResponseComparison'
 import { apiClient } from '@/lib/api-client'
 import { 
   CheckCircle, 
@@ -727,8 +728,23 @@ export default function AITestPage() {
                     </div>
                   )}
 
-                  {/* Corrected Response */}
-                  {result.correction_suggested && result.corrected_response && (
+                  {/* Side-by-Side Comparison */}
+                  {result.correction_suggested && 
+                   result.corrected_response && 
+                   result.corrected_response.trim() !== result.ai_response.trim() &&
+                   result.validation_result.violations.length > 0 && (
+                    <ResponseComparison
+                      originalResponse={result.ai_response}
+                      correctedResponse={result.corrected_response}
+                      violations={result.validation_result.violations}
+                      verificationResults={result.validation_result.verification_results}
+                    />
+                  )}
+
+                  {/* Corrected Response (fallback if no comparison) */}
+                  {result.correction_suggested && 
+                   result.corrected_response && 
+                   (result.corrected_response.trim() === result.ai_response.trim() || result.validation_result.violations.length === 0) && (
                     <div className="p-4 bg-[#f0fdf4] border border-[#10b981]">
                       <h3 className="text-sm font-semibold text-black mb-3 flex items-center gap-2">
                         <CheckCircle size={16} className="text-[#10b981]" />

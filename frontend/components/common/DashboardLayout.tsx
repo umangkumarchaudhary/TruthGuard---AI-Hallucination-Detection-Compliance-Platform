@@ -13,7 +13,9 @@ import {
   Settings,
   Menu,
   X,
-  Sparkles
+  Sparkles,
+  Radio,
+  Badge
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -23,11 +25,13 @@ interface DashboardLayoutProps {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'AI Test', href: '/ai-test', icon: Sparkles },
+  { name: 'Live Demo', href: '/live-demo', icon: Radio },
   { name: 'Interactions', href: '/interactions', icon: MessageSquare },
   { name: 'Violations', href: '/violations', icon: AlertTriangle },
   { name: 'Policies', href: '/policies', icon: FileText },
   { name: 'Compliance Rules', href: '/compliance-rules', icon: Shield },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Badge Generator', href: '/badge', icon: Badge },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 

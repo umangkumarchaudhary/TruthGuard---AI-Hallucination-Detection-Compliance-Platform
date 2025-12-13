@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/common/DashboardLayout'
+import ExportButton from '@/components/audit/ExportButton'
 import { apiClient } from '@/lib/api-client'
 import { Search, Filter, Calendar } from 'lucide-react'
 
@@ -66,9 +67,12 @@ export default function InteractionsPage() {
   return (
     <DashboardLayout>
       <div className="p-4 lg:p-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-black mb-2">Interactions</h1>
-          <p className="text-sm text-black/60">View and analyze all AI interactions</p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-black mb-2">Interactions</h1>
+            <p className="text-sm text-black/60">View and analyze all AI interactions</p>
+          </div>
+          <ExportButton organizationId="00000000-0000-0000-0000-000000000001" />
         </div>
 
         {/* Filters */}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import DashboardLayout from '@/components/common/DashboardLayout'
+import SeverityBadge from '@/components/common/SeverityBadge'
 import { apiClient } from '@/lib/api-client'
 import { AlertTriangle, Filter } from 'lucide-react'
 
@@ -112,7 +113,7 @@ export default function ViolationsPage() {
                         </p>
                       </div>
                     </div>
-                    <SeverityBadge severity={violation.severity} />
+                    <SeverityBadge severity={violation.severity as 'critical' | 'high' | 'medium' | 'low'} />
                   </div>
                   <p className="text-sm text-black/80">{violation.description}</p>
                   <a
@@ -128,21 +129,6 @@ export default function ViolationsPage() {
         )}
       </div>
     </DashboardLayout>
-  )
-}
-
-function SeverityBadge({ severity }: { severity: string }) {
-  const colors = {
-    critical: 'bg-[#dc2626] text-white',
-    high: 'bg-[#f59e0b] text-white',
-    medium: 'bg-[#3b82f6] text-white',
-    low: 'bg-[#10b981] text-white',
-  }
-
-  return (
-    <span className={`px-3 py-1 text-xs font-medium ${colors[severity as keyof typeof colors] || 'bg-black text-white'}`}>
-      {severity.toUpperCase()}
-    </span>
   )
 }
 

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import DashboardLayout from '@/components/common/DashboardLayout'
+import HistoricalTrendsChart from '@/components/analytics/HistoricalTrendsChart'
+import BeforeAfterDashboard from '@/components/comparison/BeforeAfterDashboard'
 import { apiClient } from '@/lib/api-client'
 import {
   LineChart,
@@ -81,6 +83,12 @@ export default function AnalyticsPage() {
           </div>
         ) : data ? (
           <div className="space-y-6">
+            {/* Before/After Comparison - Prominent */}
+            <BeforeAfterDashboard organizationId="00000000-0000-0000-0000-000000000001" />
+
+            {/* Historical Trends Chart */}
+            <HistoricalTrendsChart organizationId="00000000-0000-0000-0000-000000000001" />
+
             {/* Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard title="Total Interactions" value={data.total_interactions} />
