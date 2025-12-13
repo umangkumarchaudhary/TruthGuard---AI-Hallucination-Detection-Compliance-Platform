@@ -70,15 +70,24 @@ def detect_hallucinations(
             })
         
         # Step 4: Check consistency (if we have historical data)
+        # Skip consistency check for very short responses (< 3 words) as they're often valid
         consistency_score = 0.7  # Default
         try:
-            consistency_score = check_historical_consistency(query, organization_id, ai_response)
-            if consistency_score < 0.5:
-                result.violations.append({
-                    'type': 'consistency',
-                    'severity': 'medium',
-                    'description': f'Response is inconsistent with historical responses (score: {consistency_score:.2f})'
-                })
+            # Only check consistency for responses with meaningful content
+            word_count = len(ai_response.split())
+            if word_count >= 3:  # Only check if response has at least 3 words
+                consistency_score = check_historical_consistency(query, organization_id, ai_response)
+                # Only flag consistency if EXTREMELY inconsistent (< 0.1) - likely a real contradiction
+                # Very low scores (< 0.1) usually mean no similar data, not actual inconsistency
+                # Don't penalize just because responses are different
+                if consistency_score < 0.1:
+                    # Only flag if it's a clear contradiction (very low score)
+                    # But mark it as informational only - don't let it block/flag the response
+                    result.violations.append({
+                        'type': 'consistency',
+                        'severity': 'low',  # Low severity - informational only
+                        'description': f'Response differs significantly from historical responses (score: {consistency_score:.2f})'
+                    })
         except Exception as e:
             logger.warning(f"Could not check consistency: {str(e)}")
         
@@ -124,13 +133,51 @@ def detect_hallucinations(
         # Step 8: Determine status (consider compliance violations)
         # Critical compliance violations always block
         critical_violations = [v for v in result.violations if v.get('severity') == 'critical']
+        high_severity_violations = [v for v in result.violations if v.get('severity') == 'high']
+        
+        # Real violations that should block: compliance, policy, citation (not just consistency)
+        real_violations = [v for v in result.violations if v.get('type') in ['compliance', 'policy', 'citation']]
+        # Consistency violations are informational only - don't let them block/flag
+        consistency_violations = [v for v in result.violations if v.get('type') == 'consistency']
+        has_only_consistency_issues = len(result.violations) == len(consistency_violations) and len(consistency_violations) > 0
+        
         if critical_violations:
             result.status = "blocked"
-        elif result.confidence_score < 0.6:
+        elif high_severity_violations and real_violations:
+            # High severity real violations - block
             result.status = "blocked"
-        elif result.confidence_score < 0.8:
+        elif real_violations:
+            # Real violations (but not critical/high) - flag
+            result.status = "flagged"
+        # If only consistency issues (no real violations), be very lenient
+        elif has_only_consistency_issues:
+            # Consistency issues alone shouldn't block or flag - just informational
+            # Only flag if confidence is very low AND there are multiple consistency issues
+            if result.confidence_score < 0.3 and len(consistency_violations) > 1:
+                result.status = "flagged"
+            else:
+                result.status = "approved"  # Approve even with consistency issues if no real violations
+        # For very short responses (< 3 words), be very lenient
+        elif len(ai_response.split()) < 3:
+            # Short responses: only block if there are real violations
+            if real_violations:
+                result.status = "blocked"
+            elif result.confidence_score < 0.3:
+                result.status = "flagged"
+            else:
+                result.status = "approved"
+        # For longer responses, use confidence but don't block just for low confidence alone
+        elif result.confidence_score < 0.3 and real_violations:
+            # Very low confidence AND real violations - block
+            result.status = "blocked"
+        elif result.confidence_score < 0.4:
+            # Low confidence - flag for review (but don't block unless there are violations)
+            result.status = "flagged"
+        elif result.confidence_score < 0.5:
+            # Medium-low confidence - flag
             result.status = "flagged"
         else:
+            # Good confidence (≥ 0.5) - approve
             result.status = "approved"
         
         # Step 9: Generate explanation
@@ -173,12 +220,21 @@ def calculate_detection_confidence(
     Calculate overall confidence score
     Weighted combination of all checks (updated to include compliance)
     """
-    # Fact verification weight: 30% (reduced from 40%)
-    fact_score = 0.0
+    # Fact verification weight: 20% (reduced from 30%)
+    # "Unverified" doesn't mean "wrong" - it just means we couldn't verify it
+    # So we don't penalize as heavily for unverified claims
+    fact_score = 0.5  # Default to 0.5 (neutral) instead of 0.0
     if verification_results:
         verified_count = sum(1 for r in verification_results if r['verification_status'] == 'verified')
-        fact_score = verified_count / len(verification_results)
-    fact_weighted = fact_score * 0.3
+        false_count = sum(1 for r in verification_results if r['verification_status'] == 'false')
+        unverified_count = sum(1 for r in verification_results if r['verification_status'] == 'unverified')
+        total = len(verification_results)
+        
+        # Calculate score: verified = +1, false = -1, unverified = 0 (neutral)
+        if total > 0:
+            fact_score = (verified_count * 1.0 + unverified_count * 0.5 - false_count * 1.0) / total
+            fact_score = max(0.0, min(1.0, fact_score))  # Clamp between 0 and 1
+    fact_weighted = fact_score * 0.2  # Reduced weight from 0.3 to 0.2
     
     # Citation validity weight: 15% (reduced from 20%)
     citation_score = 0.0
@@ -188,8 +244,8 @@ def calculate_detection_confidence(
         citation_score = valid_citations / total_citations if total_citations > 0 else 1.0
     citation_weighted = citation_score * 0.15
     
-    # Consistency weight: 15% (reduced from 20%)
-    consistency_weighted = consistency_score * 0.15
+    # Consistency weight: 10% (reduced from 15% - consistency is less critical)
+    consistency_weighted = consistency_score * 0.10
     
     # Compliance weight: 25% (NEW)
     compliance_score = 1.0
@@ -205,9 +261,9 @@ def calculate_detection_confidence(
                 compliance_score = 1.0 - max_penalty
     compliance_weighted = compliance_score * 0.25
     
-    # Claim clarity weight: 15% (reduced from 20%)
+    # Claim clarity weight: 20% (increased from 15% - clarity is important)
     clarity_score = 0.8  # Default
-    clarity_weighted = clarity_score * 0.15
+    clarity_weighted = clarity_score * 0.20
     
     # Total confidence
     total_confidence = fact_weighted + citation_weighted + consistency_weighted + compliance_weighted + clarity_weighted

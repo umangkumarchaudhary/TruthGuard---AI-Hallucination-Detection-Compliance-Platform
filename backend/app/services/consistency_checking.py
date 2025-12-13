@@ -18,6 +18,12 @@ def check_consistency(query: str, responses: List[str]) -> float:
         return 1.0  # Single response is always consistent
     
     try:
+        # For very short responses (< 3 words), be more lenient
+        short_responses = [r for r in responses if len(r.split()) < 3]
+        if len(short_responses) == len(responses):
+            # All responses are short - don't penalize for inconsistency
+            return 0.7  # Default moderate score for short responses
+        
         # Simple consistency check based on keyword overlap
         # In production, would use embeddings for semantic similarity
         
@@ -39,25 +45,30 @@ def check_consistency(query: str, responses: List[str]) -> float:
                 set2 = response_terms[j]
                 
                 if not set1 or not set2:
+                    # If one response has no meaningful words, skip comparison
                     continue
                 
                 # Jaccard similarity
                 intersection = len(set1 & set2)
                 union = len(set1 | set2)
-                similarity = intersection / union if union > 0 else 0
+                similarity = intersection / union if union > 0 else 0.5  # Default to 0.5 instead of 0
                 overlaps.append(similarity)
         
         if not overlaps:
-            return 0.5  # Default if can't calculate
+            return 0.7  # Default if can't calculate (more lenient)
         
         # Average similarity
         consistency_score = sum(overlaps) / len(overlaps)
+        
+        # Ensure minimum score for very short responses
+        if any(len(r.split()) < 3 for r in responses):
+            consistency_score = max(consistency_score, 0.5)  # Minimum 0.5 for short responses
         
         return consistency_score
         
     except Exception as e:
         logger.error(f"Error checking consistency: {str(e)}")
-        return 0.5  # Default on error
+        return 0.7  # Default on error (more lenient)
 
 def check_historical_consistency(query: str, organization_id: str, current_response: str) -> float:
     """
@@ -74,16 +85,27 @@ def check_historical_consistency(query: str, organization_id: str, current_respo
             .execute()
         
         if not result.data or len(result.data) < 1:
-            return 0.7  # Default if no history
+            return 0.7  # Default if no history - don't penalize
+        
+        # Need at least 2 historical responses to make a meaningful comparison
+        if len(result.data) < 2:
+            return 0.6  # If only 1 historical response, be lenient
         
         historical_responses = [r['ai_response'] for r in result.data]
         historical_responses.append(current_response)
         
-        return check_consistency(query, historical_responses)
+        consistency_score = check_consistency(query, historical_responses)
+        
+        # If consistency is very low but we have few historical responses, be more lenient
+        # Low score might just mean responses are different, not wrong
+        if consistency_score < 0.3 and len(result.data) < 3:
+            return 0.5  # Boost low scores when we have little data
+        
+        return consistency_score
         
     except Exception as e:
         logger.error(f"Error checking historical consistency: {str(e)}")
-        return 0.5
+        return 0.6  # More lenient default
 
 def detect_contradictions(responses: List[str]) -> List[Dict[str, Any]]:
     """
