@@ -5,6 +5,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # Use hosted backend URL for production
+  NEXT_PUBLIC_API_URL = "https://truthguard-ai-hallucination-detection.onrender.com"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

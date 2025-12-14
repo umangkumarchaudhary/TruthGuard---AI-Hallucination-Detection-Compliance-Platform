@@ -36,9 +36,20 @@ app = FastAPI(
 )
 
 # CORS middleware
+# Get allowed origins from environment or use defaults
+allowed_origins = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:3000,https://truthguard-ai-hallucination-detector.netlify.app"
+).split(",")
+
+# Clean up origins (remove whitespace)
+allowed_origins = [origin.strip() for origin in allowed_origins if origin.strip()]
+
+logger.info(f"🌐 CORS allowed origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.js default port
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

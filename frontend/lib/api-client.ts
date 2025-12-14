@@ -1,4 +1,25 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+// Determine API URL:
+// 1. Use NEXT_PUBLIC_API_URL if set (highest priority)
+// 2. Use localhost if running on localhost
+// 3. Otherwise use hosted backend
+function getApiBaseUrl(): string {
+  // Check environment variable first
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL
+  }
+  
+  // Check if we're in browser and on localhost
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:8000'
+    }
+  }
+  
+  // Default to hosted backend for production
+  return 'https://truthguard-ai-hallucination-detection.onrender.com'
+}
+
+const API_BASE_URL = getApiBaseUrl()
 
 export interface ApiResponse<T> {
   data?: T
