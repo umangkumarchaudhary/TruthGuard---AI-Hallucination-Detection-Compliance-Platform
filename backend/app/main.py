@@ -37,22 +37,25 @@ app = FastAPI(
 
 # CORS middleware
 # Get allowed origins from environment or use defaults
-allowed_origins = os.getenv(
+cors_origins_env = os.getenv(
     "CORS_ORIGINS",
     "http://localhost:3000,https://truthguard-ai-hallucination-detector.netlify.app"
-).split(",")
+)
 
-# Clean up origins (remove whitespace)
-allowed_origins = [origin.strip() for origin in allowed_origins if origin.strip()]
+# Split and clean up origins (remove whitespace)
+allowed_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
 
 logger.info(f"🌐 CORS allowed origins: {allowed_origins}")
+print(f"🌐 CORS allowed origins: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=allowed_origins,  # Explicit list - no wildcard with credentials
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=3600,
 )
 
 # Import database utilities after app creation
@@ -89,6 +92,16 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
+
+@app.get("/cors-test")
+async def cors_test():
+    """Test endpoint to verify CORS is working"""
+    return {
+        "message": "CORS is working!",
+        "allowed_origins": allowed_origins,
+        "cors_origins_env": cors_origins_env,
+        "environment": os.getenv("ENVIRONMENT", "development")
+    }
 
 @app.get("/test-db")
 async def test_db():

@@ -20,7 +20,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 **Note:** The `NEXT_PUBLIC_API_URL` is already set in `netlify.toml`, but you can override it here if needed.
 
-### 2. Backend CORS Configuration (Render)
+### 2. Backend CORS Configuration (Render) - **CRITICAL**
 
 Go to **Render Dashboard → Your Service → Environment** and add:
 
@@ -28,14 +28,18 @@ Go to **Render Dashboard → Your Service → Environment** and add:
 CORS_ORIGINS=http://localhost:3000,https://truthguard-ai-hallucination-detector.netlify.app
 ```
 
-**Or** update your backend `.env` file on Render with:
-```
-CORS_ORIGINS=http://localhost:3000,https://truthguard-ai-hallucination-detector.netlify.app
-```
+**IMPORTANT:** After adding the environment variable:
+1. **Save the environment variable**
+2. **Redeploy/Restart your backend service** on Render
+3. The backend must restart for CORS changes to take effect
 
 This allows requests from:
 - Local development (`localhost:3000`)
 - Production Netlify site (`truthguard-ai-hallucination-detector.netlify.app`)
+
+**Verify CORS is working:**
+Visit: `https://truthguard-ai-hallucination-detection.onrender.com/cors-test`
+You should see the allowed origins listed.
 
 ### 3. How It Works
 
