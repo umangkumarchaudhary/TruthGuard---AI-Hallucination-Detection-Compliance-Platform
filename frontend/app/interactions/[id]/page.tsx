@@ -180,8 +180,18 @@ export default function InteractionDetailPage() {
           <ResponseComparison
             originalResponse={interaction.ai_response}
             correctedResponse={interaction.validated_response}
-            violations={violations}
-            verificationResults={verification_results}
+            violations={violations.map(v => ({
+              type: v.violation_type,
+              severity: v.severity,
+              description: v.description
+            }))}
+            verificationResults={verification_results.map(r => ({
+              claim_text: r.claim_text,
+              verification_status: r.verification_status,
+              source: r.source ?? undefined,
+              url: r.url ?? undefined,
+              details: r.details ?? undefined
+            }))}
           />
         )}
 
@@ -206,7 +216,7 @@ export default function InteractionDetailPage() {
                 <div key={violation.id} className="border-l-4 border-[#dc2626] pl-4 py-2">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-semibold text-black">{violation.violation_type}</span>
-                    <SeverityBadge severity={violation.severity} />
+                    <SeverityBadge severity={violation.severity as 'critical' | 'high' | 'medium' | 'low'} />
                   </div>
                   <p className="text-sm text-black/80">{violation.description}</p>
                 </div>

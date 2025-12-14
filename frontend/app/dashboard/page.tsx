@@ -67,30 +67,34 @@ export default function DashboardPage() {
   const loadDashboardData = async () => {
     setLoading(true)
     try {
-      // Get stats
-      const statsRes = await apiClient.get<DashboardStats>('/api/v1/audit/stats?organization_id=00000000-0000-0000-0000-000000000001')
-      if (statsRes.error) {
-        if (statsRes.error.includes('401') || statsRes.error.includes('Unauthorized')) {
+      const orgId = '00000000-0000-0000-0000-000000000001'
+      
+      // Load all data in parallel for faster loading
+      const [statsRes, interactionsRes, impactRes] = await Promise.allSettled([
+        apiClient.get<DashboardStats>(`/api/v1/audit/stats?organization_id=${orgId}`),
+        apiClient.get<any[]>(`/api/v1/audit/interactions?limit=5&organization_id=${orgId}`),
+        apiClient.get<BusinessImpactData>(`/api/v1/audit/business-impact?organization_id=${orgId}`)
+      ])
+
+      // Process stats
+      if (statsRes.status === 'fulfilled' && statsRes.value.data) {
+        setStats(statsRes.value.data)
+      } else if (statsRes.status === 'fulfilled' && statsRes.value.error) {
+        if (statsRes.value.error.includes('401') || statsRes.value.error.includes('Unauthorized')) {
           console.warn('⚠️ API key missing. For development, set DEV_BYPASS_AUTH=true in backend/.env or create an API key.')
         }
-      } else if (statsRes.data) {
-        setStats(statsRes.data)
       }
 
-      // Get recent interactions
-      const interactionsRes = await apiClient.get<any[]>('/api/v1/audit/interactions?limit=5&organization_id=00000000-0000-0000-0000-000000000001')
-      if (interactionsRes.error) {
-        // Error already logged above
-      } else if (interactionsRes.data) {
-        setRecentInteractions(interactionsRes.data)
+      // Process interactions
+      if (interactionsRes.status === 'fulfilled' && interactionsRes.value.data) {
+        setRecentInteractions(interactionsRes.value.data)
       }
 
-      // Get business impact metrics
-      const impactRes = await apiClient.get<BusinessImpactData>('/api/v1/audit/business-impact?organization_id=00000000-0000-0000-0000-000000000001')
-      if (impactRes.error) {
-        console.warn('Could not load business impact data:', impactRes.error)
-      } else if (impactRes.data) {
-        setBusinessImpact(impactRes.data)
+      // Process business impact
+      if (impactRes.status === 'fulfilled' && impactRes.value.data) {
+        setBusinessImpact(impactRes.value.data)
+      } else if (impactRes.status === 'fulfilled' && impactRes.value.error) {
+        console.warn('Could not load business impact data:', impactRes.value.error)
       }
     } catch (error) {
       console.error('Error loading dashboard data:', error)
@@ -122,19 +126,30 @@ export default function DashboardPage() {
           <p className="text-sm text-black/60">Monitor AI interactions and compliance in real-time</p>
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-black">Loading...</div>
+        {/* Progressive Loading - Show skeleton while loading */}
+        {loading && !stats ? (
+          <div className="space-y-8">
+            {/* Skeleton for metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white border border-[#e5e5e5] p-6 animate-pulse">
+                  <div className="h-4 bg-[#e5e5e5] w-24 mb-4"></div>
+                  <div className="h-8 bg-[#e5e5e5] w-16"></div>
+                </div>
+              ))}
+            </div>
+            {/* Skeleton for charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {[1, 2].map((i) => (
+                <div key={i} className="bg-white border border-[#e5e5e5] p-6 animate-pulse">
+                  <div className="h-6 bg-[#e5e5e5] w-32 mb-4"></div>
+                  <div className="h-64 bg-[#e5e5e5]"></div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <>
-            {/* Business Impact Card - Prominent */}
-            {businessImpact && (
-              <div className="mb-8">
-                <BusinessImpactCard data={businessImpact} loading={false} />
-              </div>
-            )}
-
             {/* Metrics Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <MetricCard
@@ -207,7 +222,16 @@ export default function DashboardPage() {
             </div>
 
             {/* Recent Interactions */}
-            <div className="bg-white border border-[#e5e5e5]">
+            
+
+            {/* Business Impact Card - Below Dashboard */}
+            {businessImpact && (
+              <div className="mt-8">
+                <BusinessImpactCard data={businessImpact} loading={false} />
+              </div>
+            )}
+
+<div className="bg-white border border-[#e5e5e5]">
               <div className="border-b border-[#e5e5e5] px-6 py-4">
                 <h2 className="text-lg font-semibold text-black">Recent Interactions</h2>
               </div>
@@ -232,7 +256,7 @@ export default function DashboardPage() {
                   ))
                 )}
               </div>
-            </div>
+            </div> 
           </>
         )}
       </div>

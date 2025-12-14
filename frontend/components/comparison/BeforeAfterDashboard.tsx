@@ -66,22 +66,25 @@ export default function BeforeAfterDashboard({
       )
 
       if (beforeRes.data && afterRes.data) {
+        const beforeData = beforeRes.data as any
+        const afterData = afterRes.data as any
+        
         setData({
           before: {
-            total_interactions: beforeRes.data.total_interactions || 0,
-            approved_count: beforeRes.data.approved_count || 0,
-            flagged_count: beforeRes.data.flagged_count || 0,
-            blocked_count: beforeRes.data.blocked_count || 0,
-            avg_confidence: beforeRes.data.avg_confidence_score || 0,
-            total_violations: beforeRes.data.total_violations || 0
+            total_interactions: beforeData?.total_interactions || 0,
+            approved_count: beforeData?.approved_count || 0,
+            flagged_count: beforeData?.flagged_count || 0,
+            blocked_count: beforeData?.blocked_count || 0,
+            avg_confidence: beforeData?.avg_confidence_score || 0,
+            total_violations: beforeData?.total_violations || 0
           },
           after: {
-            total_interactions: afterRes.data.total_interactions || 0,
-            approved_count: afterRes.data.approved_count || 0,
-            flagged_count: afterRes.data.flagged_count || 0,
-            blocked_count: afterRes.data.blocked_count || 0,
-            avg_confidence: afterRes.data.avg_confidence_score || 0,
-            total_violations: afterRes.data.total_violations || 0
+            total_interactions: afterData?.total_interactions || 0,
+            approved_count: afterData?.approved_count || 0,
+            flagged_count: afterData?.flagged_count || 0,
+            blocked_count: afterData?.blocked_count || 0,
+            avg_confidence: afterData?.avg_confidence_score || 0,
+            total_violations: afterData?.total_violations || 0
           },
           period: {
             before_start: beforeStart.split('T')[0],

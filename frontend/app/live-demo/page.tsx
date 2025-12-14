@@ -44,7 +44,7 @@ export default function LiveDemoPage() {
           id: `demo-${Date.now()}-${currentIndex}`,
           query: testCase.query,
           aiResponse: testCase.aiResponse,
-          status: validationResult.status,
+          status: validationResult.status as 'approved' | 'flagged' | 'blocked',
           confidence: validationResult.confidence,
           responseTime: testCase.responseTime || Math.random() * 0.2 + 0.15,
           timestamp: new Date(),
@@ -87,11 +87,12 @@ export default function LiveDemoPage() {
         ai_model: 'demo'
       })
 
-      if (response.data) {
+      if (response.data && typeof response.data === 'object' && 'status' in response.data) {
+        const data = response.data as { status: string; confidence_score?: number; violations?: any[] }
         return {
-          status: response.data.status,
-          confidence: response.data.confidence_score || 0.8,
-          violations: response.data.violations?.length || 0
+          status: data.status,
+          confidence: data.confidence_score || 0.8,
+          violations: data.violations?.length || 0
         }
       }
     } catch (error) {

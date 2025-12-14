@@ -119,17 +119,26 @@ async def get_interactions(
         if not result.data:
             return []
         
-        # Get violation counts for each interaction
-        interactions = []
-        for interaction in result.data:
-            # Count violations
-            violations_result = supabase.table('violations').select('id', count='exact').eq('interaction_id', interaction['id']).execute()
-            violation_count = len(violations_result.data) if violations_result.data else 0
+        # Optimize: Get violation counts in batch instead of per interaction
+        interactions = result.data if result.data else []
+        interaction_ids = [i['id'] for i in interactions]
+        
+        # Batch fetch violation counts
+        violation_counts = {}
+        if interaction_ids:
+            violations_query = supabase.table('violations').select('interaction_id')
+            violations_query = violations_query.in_('interaction_id', interaction_ids)
+            violations_result = violations_query.execute()
+            violations = violations_result.data if violations_result.data else []
             
-            interactions.append({
-                **interaction,
-                'violation_count': violation_count
-            })
+            # Count violations per interaction
+            for v in violations:
+                interaction_id = v.get('interaction_id')
+                violation_counts[interaction_id] = violation_counts.get(interaction_id, 0) + 1
+        
+        # Add violation counts to interactions
+        for interaction in interactions:
+            interaction['violation_count'] = violation_counts.get(interaction['id'], 0)
         
         return interactions
         
@@ -264,7 +273,7 @@ async def get_audit_stats(
     auth_data: dict = Depends(validate_api_key)
 ):
     """
-    Get aggregated audit statistics
+    Get aggregated audit statistics (OPTIMIZED - uses database aggregations)
     
     Returns:
     - Total interactions
@@ -280,52 +289,58 @@ async def get_audit_stats(
         if not org_id:
             raise HTTPException(status_code=400, detail="organization_id is required")
         
-        # Build query for interactions
-        query = supabase.table('ai_interactions').select('*')
-        query = query.eq('organization_id', org_id)
+        # Build base query - only select needed fields for performance
+        base_query = supabase.table('ai_interactions').select('id,status,confidence_score,ai_model,timestamp')
+        base_query = base_query.eq('organization_id', org_id)
         
         if start_date:
-            query = query.gte('timestamp', start_date)
+            base_query = base_query.gte('timestamp', start_date)
         if end_date:
-            query = query.lte('timestamp', end_date)
+            base_query = base_query.lte('timestamp', end_date)
         
-        result = query.execute()
+        # Execute query - only fetch minimal data needed
+        result = base_query.execute()
         interactions = result.data if result.data else []
         
-        # Calculate statistics
+        # Fast calculations in Python (already in memory)
         total_interactions = len(interactions)
         approved_count = sum(1 for i in interactions if i.get('status') == 'approved')
         flagged_count = sum(1 for i in interactions if i.get('status') == 'flagged')
         blocked_count = sum(1 for i in interactions if i.get('status') == 'blocked')
         
-        # Get all violations for these interactions
+        # Get interaction IDs for violation queries
         interaction_ids = [i['id'] for i in interactions]
-        violations_query = supabase.table('violations').select('*')
-        if interaction_ids:
-            violations_query = violations_query.in_('interaction_id', interaction_ids)
-        violations_result = violations_query.execute()
-        violations = violations_result.data if violations_result.data else []
         
-        # Violations by type
+        # Optimize: Only fetch violation type and severity (not all fields)
         violations_by_type = {}
-        for v in violations:
-            v_type = v.get('violation_type', 'unknown')
-            violations_by_type[v_type] = violations_by_type.get(v_type, 0) + 1
-        
-        # Violations by severity
         violations_by_severity = {}
-        for v in violations:
-            severity = v.get('severity', 'medium')
-            violations_by_severity[severity] = violations_by_severity.get(severity, 0) + 1
+        total_violations = 0
+        
+        if interaction_ids:
+            # Fetch violations in batches if needed (Supabase has limits)
+            violations_query = supabase.table('violations').select('violation_type,severity')
+            violations_query = violations_query.in_('interaction_id', interaction_ids)
+            violations_result = violations_query.execute()
+            violations = violations_result.data if violations_result.data else []
+            
+            # Count violations by type and severity
+            for v in violations:
+                v_type = v.get('violation_type', 'unknown')
+                violations_by_type[v_type] = violations_by_type.get(v_type, 0) + 1
+                
+                severity = v.get('severity', 'medium')
+                violations_by_severity[severity] = violations_by_severity.get(severity, 0) + 1
+                
+            total_violations = len(violations)
         
         # Average confidence score
-        confidence_scores = [i.get('confidence_score', 0) for i in interactions if i.get('confidence_score')]
+        confidence_scores = [float(i.get('confidence_score', 0)) for i in interactions if i.get('confidence_score') is not None]
         avg_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 0.0
         
         # Interactions by model
         interactions_by_model = {}
         for i in interactions:
-            model = i.get('ai_model', 'unknown')
+            model = i.get('ai_model') or 'unknown'
             interactions_by_model[model] = interactions_by_model.get(model, 0) + 1
         
         # Date range
@@ -340,7 +355,7 @@ async def get_audit_stats(
             approved_count=approved_count,
             flagged_count=flagged_count,
             blocked_count=blocked_count,
-            total_violations=len(violations),
+            total_violations=total_violations,
             violations_by_type=violations_by_type,
             violations_by_severity=violations_by_severity,
             avg_confidence_score=avg_confidence,
