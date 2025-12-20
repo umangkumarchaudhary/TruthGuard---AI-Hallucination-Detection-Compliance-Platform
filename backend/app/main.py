@@ -81,7 +81,7 @@ async def startup_event():
         logger.error(f"❌ Failed to initialize database connection: {str(e)}")
         print(f"❌ Failed to initialize database connection: {str(e)}")
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def root():
     return {
         "message": "TruthGuard API",
@@ -89,7 +89,7 @@ async def root():
         "version": "1.0.0"
     }
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health():
     return {"status": "healthy"}
 

@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import DashboardLayout from '@/components/common/DashboardLayout'
 import { apiClient } from '@/lib/api-client'
-import { Plus, Edit, Trash2, FileText } from 'lucide-react'
+import { useTheme } from '@/lib/theme-provider'
+import { Plus, Edit, Trash2, FileText, X, Check, AlertCircle } from 'lucide-react'
 
 interface Policy {
   id: string
@@ -20,6 +21,7 @@ export default function PoliciesPage() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingPolicy, setEditingPolicy] = useState<Policy | null>(null)
+  const { theme } = useTheme()
 
   useEffect(() => {
     loadPolicies()
@@ -53,17 +55,21 @@ export default function PoliciesPage() {
   return (
     <DashboardLayout>
       <div className="p-4 lg:p-8">
-        <div className="mb-8 flex items-center justify-between">
+        {/* Header */}
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-slide-down">
           <div>
-            <h1 className="text-3xl font-bold text-black mb-2">Policies</h1>
-            <p className="text-sm text-black/60">Manage company policies</p>
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-2" style={{ color: 'var(--foreground)' }}>
+              Policies
+            </h1>
+            <p style={{ color: 'var(--foreground-muted)' }}>Manage company policies</p>
           </div>
           <button
             onClick={() => {
               setEditingPolicy(null)
               setShowModal(true)
             }}
-            className="px-6 py-3 bg-black text-white hover:bg-black/90 flex items-center gap-2"
+            className="px-6 py-3 flex items-center gap-2 text-sm font-semibold text-white transition-all hover:scale-105"
+            style={{ background: 'var(--accent-gradient)', boxShadow: '0 0 20px var(--glow)' }}
           >
             <Plus size={18} />
             <span>New Policy</span>
@@ -71,42 +77,81 @@ export default function PoliciesPage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-black">Loading...</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="premium-card p-6">
+                <div className="h-6 w-40 rounded mb-4" style={{ background: 'var(--background-tertiary)' }} />
+                <div className="h-4 w-full rounded mb-2" style={{ background: 'var(--background-tertiary)' }} />
+                <div className="h-4 w-3/4 rounded" style={{ background: 'var(--background-tertiary)' }} />
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
             {policies.length === 0 ? (
-              <div className="col-span-full bg-white border border-[#e5e5e5] p-12 text-center">
-                <p className="text-black/60">No policies found</p>
+              <div className="col-span-full premium-card p-12 text-center">
+                <FileText size={48} className="mx-auto mb-4 opacity-30" style={{ color: 'var(--foreground-muted)' }} />
+                <p className="text-lg font-semibold mb-2" style={{ color: 'var(--foreground)' }}>No Policies Found</p>
+                <p style={{ color: 'var(--foreground-muted)' }}>Create your first policy to get started.</p>
               </div>
             ) : (
               policies.map((policy) => (
-                <div key={policy.id} className="bg-white border border-[#e5e5e5] p-6">
+                <div key={policy.id} className="premium-card p-6 group">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <FileText size={20} className="text-black" />
+                      <div
+                        className="w-10 h-10 flex items-center justify-center"
+                        style={{ background: theme === 'dark' ? 'rgba(96, 165, 250, 0.15)' : 'rgba(59, 130, 246, 0.1)' }}
+                      >
+                        <FileText size={20} style={{ color: theme === 'dark' ? '#60a5fa' : '#3b82f6' }} />
+                      </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-black">{policy.policy_name}</h3>
-                        <p className="text-xs text-black/60">{policy.category}</p>
+                        <h3 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
+                          {policy.policy_name}
+                        </h3>
+                        <p className="text-xs" style={{ color: 'var(--foreground-muted)' }}>{policy.category}</p>
                       </div>
                     </div>
+                    <span
+                      className="px-2 py-1 text-xs font-semibold"
+                      style={{
+                        background: policy.is_active ? 'var(--success-bg)' : 'var(--background-tertiary)',
+                        color: policy.is_active ? 'var(--success)' : 'var(--foreground-muted)'
+                      }}
+                    >
+                      {policy.is_active ? 'Active' : 'Inactive'}
+                    </span>
                   </div>
-                  <p className="text-sm text-black/80 mb-4 line-clamp-3">{policy.policy_content}</p>
+                  <p
+                    className="text-sm mb-4 line-clamp-3 leading-relaxed"
+                    style={{ color: 'var(--foreground-secondary)' }}
+                  >
+                    {policy.policy_content}
+                  </p>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => {
                         setEditingPolicy(policy)
                         setShowModal(true)
                       }}
-                      className="px-4 py-2 border border-[#e5e5e5] bg-white text-black hover:bg-[#f5f5f5] flex items-center gap-2"
+                      className="flex-1 px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+                      style={{
+                        background: 'var(--background-tertiary)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--foreground)'
+                      }}
                     >
                       <Edit size={16} />
                       <span>Edit</span>
                     </button>
                     <button
                       onClick={() => handleDelete(policy.id)}
-                      className="px-4 py-2 border border-[#e5e5e5] bg-white text-black hover:bg-[#f5f5f5] flex items-center gap-2"
+                      className="px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+                      style={{
+                        background: 'var(--danger-bg)',
+                        border: '1px solid var(--danger)',
+                        color: 'var(--danger)'
+                      }}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -132,11 +177,11 @@ export default function PoliciesPage() {
   )
 }
 
-function PolicyModal({ 
-  policy, 
-  onClose, 
-  onSave 
-}: { 
+function PolicyModal({
+  policy,
+  onClose,
+  onSave
+}: {
   policy: Policy | null
   onClose: () => void
   onSave: () => void
@@ -144,9 +189,11 @@ function PolicyModal({
   const [name, setName] = useState(policy?.policy_name || '')
   const [content, setContent] = useState(policy?.policy_content || '')
   const [category, setCategory] = useState(policy?.category || '')
+  const [saving, setSaving] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSaving(true)
     try {
       const data = {
         policy_name: name,
@@ -164,62 +211,118 @@ function PolicyModal({
       onClose()
     } catch (error) {
       console.error('Error saving policy:', error)
+    } finally {
+      setSaving(false)
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white border border-[#e5e5e5] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="border-b border-[#e5e5e5] px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-black">
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ background: 'rgba(0,0,0,0.5)' }}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        style={{
+          background: 'var(--background)',
+          border: '1px solid var(--border)',
+          boxShadow: '0 0 50px var(--glow)'
+        }}
+      >
+        <div
+          className="px-6 py-4 flex items-center justify-between"
+          style={{ borderBottom: '1px solid var(--border)' }}
+        >
+          <h2 className="text-xl font-bold" style={{ color: 'var(--foreground)' }}>
             {policy ? 'Edit Policy' : 'New Policy'}
           </h2>
-          <button onClick={onClose} className="text-black hover:text-black/60">
-            ×
+          <button
+            onClick={onClose}
+            className="p-2 transition-colors"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <X size={20} />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-black mb-2">Policy Name</label>
+            <label
+              className="block text-sm font-semibold mb-2"
+              style={{ color: 'var(--foreground)' }}
+            >
+              Policy Name
+            </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-[#e5e5e5] bg-white text-black focus:outline-none focus:border-black"
+              className="w-full px-4 py-3 text-sm focus:outline-none"
+              style={{
+                background: 'var(--background-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)'
+              }}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-black mb-2">Category</label>
+            <label
+              className="block text-sm font-semibold mb-2"
+              style={{ color: 'var(--foreground)' }}
+            >
+              Category
+            </label>
             <input
               type="text"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2 border border-[#e5e5e5] bg-white text-black focus:outline-none focus:border-black"
+              className="w-full px-4 py-3 text-sm focus:outline-none"
+              style={{
+                background: 'var(--background-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)'
+              }}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-black mb-2">Content</label>
+            <label
+              className="block text-sm font-semibold mb-2"
+              style={{ color: 'var(--foreground)' }}
+            >
+              Content
+            </label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={10}
-              className="w-full px-4 py-2 border border-[#e5e5e5] bg-white text-black focus:outline-none focus:border-black"
+              className="w-full px-4 py-3 text-sm focus:outline-none resize-none"
+              style={{
+                background: 'var(--background-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)'
+              }}
               required
             />
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 pt-4">
             <button
               type="submit"
-              className="px-6 py-3 bg-black text-white hover:bg-black/90"
+              disabled={saving}
+              className="flex-1 px-6 py-3 text-sm font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50"
+              style={{ background: 'var(--accent-gradient)' }}
             >
-              {policy ? 'Update' : 'Create'}
+              {saving ? 'Saving...' : policy ? 'Update Policy' : 'Create Policy'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 border border-[#e5e5e5] bg-white text-black hover:bg-[#f5f5f5]"
+              className="px-6 py-3 text-sm font-medium"
+              style={{
+                background: 'var(--background-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)'
+              }}
             >
               Cancel
             </button>
@@ -229,4 +332,3 @@ function PolicyModal({
     </div>
   )
 }
-

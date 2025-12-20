@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/common/DashboardLayout'
 import ExportButton from '@/components/audit/ExportButton'
 import { apiClient } from '@/lib/api-client'
-import { Search, Filter, Calendar } from 'lucide-react'
+import { useTheme } from '@/lib/theme-provider'
+import { Search, Filter, Calendar, ChevronRight, Activity, CheckCircle, AlertCircle, XCircle, Clock } from 'lucide-react'
 
 interface Interaction {
   id: string
@@ -27,6 +28,7 @@ export default function InteractionsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const { theme } = useTheme()
   const itemsPerPage = 20
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function InteractionsPage() {
         offset: ((currentPage - 1) * itemsPerPage).toString(),
         organization_id: '00000000-0000-0000-0000-000000000001',
       })
-      
+
       if (statusFilter !== 'all') {
         params.append('status', statusFilter)
       }
@@ -49,7 +51,6 @@ export default function InteractionsPage() {
       const res = await apiClient.get<Interaction[]>(`/api/v1/audit/interactions?${params}`)
       if (res.data) {
         setInteractions(res.data)
-        // In real app, get total from API
         setTotalPages(Math.ceil((res.data.length || 0) / itemsPerPage))
       }
     } catch (error) {
@@ -67,26 +68,38 @@ export default function InteractionsPage() {
   return (
     <DashboardLayout>
       <div className="p-4 lg:p-8">
-        <div className="mb-8 flex items-start justify-between">
+        {/* Header */}
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4 animate-slide-down">
           <div>
-            <h1 className="text-3xl font-bold text-black mb-2">Interactions</h1>
-            <p className="text-sm text-black/60">View and analyze all AI interactions</p>
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-2" style={{ color: 'var(--foreground)' }}>
+              Interactions
+            </h1>
+            <p style={{ color: 'var(--foreground-muted)' }}>View and analyze all AI interactions</p>
           </div>
           <ExportButton organizationId="00000000-0000-0000-0000-000000000001" />
         </div>
 
         {/* Filters */}
-        <div className="bg-white border border-[#e5e5e5] p-4 mb-6">
+        <div className="premium-card p-4 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Filter size={18} style={{ color: 'var(--foreground-muted)' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Filters</span>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black/40" size={18} />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2" size={18} style={{ color: 'var(--foreground-muted)' }} />
               <input
                 type="text"
                 placeholder="Search interactions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-[#e5e5e5] bg-white text-black focus:outline-none focus:border-black"
+                className="w-full pl-10 pr-4 py-3 text-sm focus:outline-none"
+                style={{
+                  background: 'var(--background-tertiary)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--foreground)'
+                }}
               />
             </div>
 
@@ -97,7 +110,12 @@ export default function InteractionsPage() {
                 setStatusFilter(e.target.value)
                 setCurrentPage(1)
               }}
-              className="px-4 py-2 border border-[#e5e5e5] bg-white text-black focus:outline-none focus:border-black"
+              className="px-4 py-3 text-sm focus:outline-none"
+              style={{
+                background: 'var(--background-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)'
+              }}
             >
               <option value="all">All Status</option>
               <option value="approved">Approved</option>
@@ -105,94 +123,100 @@ export default function InteractionsPage() {
               <option value="blocked">Blocked</option>
             </select>
 
-            {/* Date Filter Placeholder */}
-            <button className="px-4 py-2 border border-[#e5e5e5] bg-white text-black hover:bg-[#f5f5f5] flex items-center gap-2">
+            {/* Date Filter */}
+            <button
+              className="px-4 py-3 flex items-center gap-2 text-sm"
+              style={{
+                background: 'var(--background-tertiary)',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)'
+              }}
+            >
               <Calendar size={18} />
               <span>Date Range</span>
             </button>
           </div>
         </div>
 
-        {/* Interactions Table */}
+        {/* Interactions List */}
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-black">Loading...</div>
+          <div className="space-y-4 animate-pulse">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="premium-card p-6">
+                <div className="h-5 w-3/4 rounded mb-3" style={{ background: 'var(--background-tertiary)' }} />
+                <div className="h-4 w-1/2 rounded" style={{ background: 'var(--background-tertiary)' }} />
+              </div>
+            ))}
+          </div>
+        ) : filteredInteractions.length === 0 ? (
+          <div className="premium-card p-12 text-center">
+            <Activity size={48} className="mx-auto mb-4 opacity-30" style={{ color: 'var(--foreground-muted)' }} />
+            <p className="text-lg font-semibold mb-2" style={{ color: 'var(--foreground)' }}>No Interactions Found</p>
+            <p style={{ color: 'var(--foreground-muted)' }}>Start testing AI responses to see data here.</p>
           </div>
         ) : (
-          <div className="bg-white border border-[#e5e5e5]">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[#f5f5f5] border-b border-[#e5e5e5]">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Query</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Confidence</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Violations</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Timestamp</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#e5e5e5]">
-                  {filteredInteractions.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-8 text-center text-black/60">
-                        No interactions found
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredInteractions.map((interaction) => (
-                      <tr key={interaction.id} className="hover:bg-[#f5f5f5] transition-colors">
-                        <td className="px-6 py-4">
-                          <p className="text-sm text-black max-w-md truncate">{interaction.user_query}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <StatusBadge status={interaction.status} />
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-black">
-                            {(interaction.confidence_score * 100).toFixed(0)}%
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-black">{interaction.violation_count}</span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-black/60">
-                            {new Date(interaction.timestamp).toLocaleString()}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => router.push(`/interactions/${interaction.id}`)}
-                            className="text-sm text-black hover:text-black/60 underline"
-                          >
-                            View Details
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-3 stagger-children">
+            {filteredInteractions.map((interaction) => (
+              <div
+                key={interaction.id}
+                className="premium-card p-4 lg:p-6 cursor-pointer group"
+                onClick={() => router.push(`/interactions/${interaction.id}`)}
+              >
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium mb-2 truncate" style={{ color: 'var(--foreground)' }}>
+                      {interaction.user_query}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3 text-xs" style={{ color: 'var(--foreground-muted)' }}>
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} />
+                        {new Date(interaction.timestamp).toLocaleString()}
+                      </span>
+                      <span>Confidence: {(interaction.confidence_score * 100).toFixed(0)}%</span>
+                      {interaction.violation_count > 0 && (
+                        <span style={{ color: 'var(--danger)' }}>{interaction.violation_count} violations</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <StatusBadge status={interaction.status} />
+                    <ChevronRight
+                      size={20}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ color: 'var(--foreground-muted)' }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="border-t border-[#e5e5e5] px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center justify-between pt-4">
                 <button
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 border border-[#e5e5e5] bg-white text-black hover:bg-[#f5f5f5] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    background: 'var(--background-tertiary)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--foreground)'
+                  }}
                 >
                   Previous
                 </button>
-                <span className="text-sm text-black/60">
+                <span className="text-sm" style={{ color: 'var(--foreground-muted)' }}>
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 border border-[#e5e5e5] bg-white text-black hover:bg-[#f5f5f5] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    background: 'var(--background-tertiary)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--foreground)'
+                  }}
                 >
                   Next
                 </button>
@@ -206,16 +230,22 @@ export default function InteractionsPage() {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const colors = {
-    approved: 'bg-[#10b981] text-white',
-    flagged: 'bg-[#f59e0b] text-white',
-    blocked: 'bg-[#dc2626] text-white',
+  const configs = {
+    approved: { bg: 'var(--success-bg)', color: 'var(--success)', icon: CheckCircle },
+    flagged: { bg: 'var(--warning-bg)', color: 'var(--warning)', icon: AlertCircle },
+    blocked: { bg: 'var(--danger-bg)', color: 'var(--danger)', icon: XCircle },
   }
 
+  const config = configs[status as keyof typeof configs] || { bg: 'var(--background-tertiary)', color: 'var(--foreground)', icon: Activity }
+  const Icon = config.icon
+
   return (
-    <span className={`px-3 py-1 text-xs font-medium ${colors[status as keyof typeof colors] || 'bg-black text-white'}`}>
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold"
+      style={{ background: config.bg, color: config.color }}
+    >
+      <Icon size={12} />
       {status.toUpperCase()}
     </span>
   )
 }
-

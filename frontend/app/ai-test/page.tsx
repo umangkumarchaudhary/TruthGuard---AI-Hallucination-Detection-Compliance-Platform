@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/common/DashboardLayout'
 import ResponseComparison from '@/components/comparison/ResponseComparison'
 import { apiClient } from '@/lib/api-client'
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Loader2, 
+import {
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Loader2,
   ExternalLink,
   Sparkles,
   FileText,
@@ -111,7 +111,7 @@ export default function AITestPage() {
   const [companies, setCompanies] = useState<Company[]>([])
   const [aiEnabled, setAiEnabled] = useState(false)
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['breakdown', 'violations', 'verification']))
-  
+
   const [formData, setFormData] = useState({
     company_id: '',
     query: '',
@@ -252,13 +252,13 @@ export default function AITestPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved':
-        return 'bg-[#10b981] text-white'
+        return 'badge-success'
       case 'flagged':
-        return 'bg-[#f59e0b] text-white'
+        return 'badge-warning'
       case 'blocked':
-        return 'bg-[#dc2626] text-white'
+        return 'badge-danger'
       default:
-        return 'bg-black text-white'
+        return ''
     }
   }
 
@@ -279,35 +279,38 @@ export default function AITestPage() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen" style={{ background: 'var(--background)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-black mb-2">AI Response Testing</h1>
-            <p className="text-sm text-black/60">Test AI responses with automated generation or manual input</p>
+          <div className="mb-8 animate-slide-down">
+            <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-2" style={{ color: 'var(--foreground)' }}>AI Response Testing</h1>
+            <p style={{ color: 'var(--foreground-muted)' }}>Test AI responses with automated generation or manual input</p>
           </div>
 
           {/* Mode Toggle */}
-          <div className="mb-8 bg-white border border-[#e5e5e5] p-1 inline-flex">
+          <div className="mb-8 premium-card p-1 inline-flex">
             <button
               onClick={() => setMode('ai')}
               disabled={!aiEnabled}
-              className={`px-6 py-3 text-sm font-medium transition-colors flex items-center gap-2 ${
-                mode === 'ai'
-                  ? 'bg-black text-white'
-                  : 'bg-white text-black hover:bg-[#f5f5f5]'
-              } ${!aiEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`px-6 py-3 text-sm font-medium transition-colors flex items-center gap-2 ${mode === 'ai'
+                ? 'text-white'
+                : ''
+                } ${!aiEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              style={{
+                background: mode === 'ai' ? 'var(--accent-gradient)' : 'transparent',
+                color: mode === 'ai' ? 'white' : 'var(--foreground)'
+              }}
             >
               <Sparkles size={16} />
               AI Generation
             </button>
             <button
               onClick={() => setMode('manual')}
-              className={`px-6 py-3 text-sm font-medium transition-colors flex items-center gap-2 ${
-                mode === 'manual'
-                  ? 'bg-black text-white'
-                  : 'bg-white text-black hover:bg-[#f5f5f5]'
-              }`}
+              className="px-6 py-3 text-sm font-medium transition-colors flex items-center gap-2"
+              style={{
+                background: mode === 'manual' ? 'var(--accent-gradient)' : 'transparent',
+                color: mode === 'manual' ? 'white' : 'var(--foreground)'
+              }}
             >
               <FileText size={16} />
               Manual Input
@@ -317,7 +320,7 @@ export default function AITestPage() {
           {!aiEnabled && mode === 'ai' && (
             <div className="mb-6 p-4 bg-[#fef3c7] border border-[#f59e0b]">
               <p className="text-sm text-black">
-                <strong>AI Generation Unavailable:</strong> Gemini Pro API key not configured. 
+                <strong>AI Generation Unavailable:</strong> Gemini Pro API key not configured.
                 Please set GEMINI_API_KEY in backend/.env or use Manual Input mode.
               </p>
             </div>
@@ -325,11 +328,11 @@ export default function AITestPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Input Section */}
-            <div className="bg-white border border-[#e5e5e5] p-8">
-              <h2 className="text-2xl font-bold text-black mb-6">
+            <div className="premium-card p-6 lg:p-8">
+              <h2 className="text-xl lg:text-2xl font-bold mb-6" style={{ color: 'var(--foreground)' }}>
                 {mode === 'ai' ? 'Generate & Validate' : 'Manual Validation'}
               </h2>
-              
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Company Selector (AI Mode) */}
                 {mode === 'ai' && (
@@ -347,7 +350,12 @@ export default function AITestPage() {
                         value={formData.company_id}
                         onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
                         required
-                        className="w-full px-4 py-3 border border-[#e5e5e5] bg-white text-black focus:outline-none focus:border-black text-sm"
+                        className="w-full px-4 py-3 text-sm font-medium focus:outline-none"
+                        style={{
+                          background: 'var(--background-tertiary)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--foreground)'
+                        }}
                       >
                         <option value="">Select a company</option>
                         {companies.map(company => (
@@ -371,7 +379,12 @@ export default function AITestPage() {
                     placeholder="Enter the user's question..."
                     required
                     rows={3}
-                    className="w-full px-4 py-3 border border-[#e5e5e5] bg-white text-black focus:outline-none focus:border-black resize-none text-sm"
+                    className="w-full px-4 py-3 resize-none text-sm"
+                    style={{
+                      background: 'var(--background-tertiary)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--foreground)'
+                    }}
                   />
                 </div>
 
@@ -387,7 +400,12 @@ export default function AITestPage() {
                       placeholder="Enter the AI's response to validate..."
                       required
                       rows={8}
-                      className="w-full px-4 py-3 border border-[#e5e5e5] bg-white text-black focus:outline-none focus:border-black resize-none text-sm"
+                      className="w-full px-4 py-3 resize-none text-sm"
+                      style={{
+                        background: 'var(--background-tertiary)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--foreground)'
+                      }}
                     />
                   </div>
                 )}
@@ -400,7 +418,12 @@ export default function AITestPage() {
                   <select
                     value={formData.ai_model}
                     onChange={(e) => setFormData({ ...formData, ai_model: e.target.value })}
-                    className="w-full px-4 py-3 border border-[#e5e5e5] bg-white text-black focus:outline-none focus:border-black text-sm"
+                    className="w-full px-4 py-3 text-sm font-medium focus:outline-none"
+                    style={{
+                      background: 'var(--background-tertiary)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--foreground)'
+                    }}
                   >
                     <option value="gemini-pro">Gemini Pro</option>
                     <option value="gpt-4">GPT-4</option>
@@ -410,11 +433,11 @@ export default function AITestPage() {
                   </select>
                 </div>
 
-                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full px-6 py-4 bg-black text-white font-semibold hover:bg-black/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                  className="w-full px-6 py-4 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm text-white"
+                  style={{ background: 'var(--accent-gradient)', boxShadow: '0 0 20px var(--glow)' }}
                 >
                   {loading ? (
                     <>
@@ -455,9 +478,9 @@ export default function AITestPage() {
             </div>
 
             {/* Results Section */}
-            <div className="bg-white border border-[#e5e5e5] p-8">
-              <h2 className="text-2xl font-bold text-black mb-6">Validation Results</h2>
-              
+            <div className="premium-card p-6 lg:p-8">
+              <h2 className="text-xl lg:text-2xl font-bold mb-6" style={{ color: 'var(--foreground)' }}>Validation Results</h2>
+
               {!result && !loading && (
                 <div className="flex items-center justify-center h-96 text-black/40">
                   <div className="text-center">
@@ -546,7 +569,7 @@ export default function AITestPage() {
                             .filter(([key]) => key !== 'contributions')
                             .map(([key, component]: [string, any]) => {
                               if (!component || typeof component !== 'object' || !component.score) return null
-                              
+
                               const scorePercent = component.score * 100
                               const weightPercent = component.weight * 100
                               const getScoreColor = (score: number) => {
@@ -688,11 +711,10 @@ export default function AITestPage() {
                             <div key={idx} className="p-4 bg-white border border-[#e5e5e5]">
                               <p className="text-sm font-medium text-black mb-3">{vr.claim_text}</p>
                               <div className="flex items-center gap-3 flex-wrap mb-3">
-                                <span className={`text-xs font-semibold px-3 py-1 ${
-                                  vr.verification_status === 'verified' ? 'bg-[#10b981]/10 text-[#10b981]' : 
-                                  vr.verification_status === 'unverified' ? 'bg-[#f59e0b]/10 text-[#f59e0b]' : 
-                                  'bg-[#dc2626]/10 text-[#dc2626]'
-                                }`}>
+                                <span className={`text-xs font-semibold px-3 py-1 ${vr.verification_status === 'verified' ? 'bg-[#10b981]/10 text-[#10b981]' :
+                                  vr.verification_status === 'unverified' ? 'bg-[#f59e0b]/10 text-[#f59e0b]' :
+                                    'bg-[#dc2626]/10 text-[#dc2626]'
+                                  }`}>
                                   {vr.verification_status.toUpperCase()}
                                 </span>
                                 <span className="text-xs text-black/60">
@@ -729,42 +751,42 @@ export default function AITestPage() {
                   )}
 
                   {/* Side-by-Side Comparison */}
-                  {result.correction_suggested && 
-                   result.corrected_response && 
-                   result.corrected_response.trim() !== result.ai_response.trim() &&
-                   result.validation_result.violations.length > 0 && (
-                    <ResponseComparison
-                      originalResponse={result.ai_response}
-                      correctedResponse={result.corrected_response}
-                      violations={result.validation_result.violations}
-                      verificationResults={result.validation_result.verification_results}
-                    />
-                  )}
+                  {result.correction_suggested &&
+                    result.corrected_response &&
+                    result.corrected_response.trim() !== result.ai_response.trim() &&
+                    result.validation_result.violations.length > 0 && (
+                      <ResponseComparison
+                        originalResponse={result.ai_response}
+                        correctedResponse={result.corrected_response}
+                        violations={result.validation_result.violations}
+                        verificationResults={result.validation_result.verification_results}
+                      />
+                    )}
 
                   {/* Corrected Response (fallback if no comparison) */}
-                  {result.correction_suggested && 
-                   result.corrected_response && 
-                   (result.corrected_response.trim() === result.ai_response.trim() || result.validation_result.violations.length === 0) && (
-                    <div className="p-4 bg-[#f0fdf4] border border-[#10b981]">
-                      <h3 className="text-sm font-semibold text-black mb-3 flex items-center gap-2">
-                        <CheckCircle size={16} className="text-[#10b981]" />
-                        Corrected Response
-                      </h3>
-                      <p className="text-sm text-black whitespace-pre-wrap leading-relaxed mb-3">
-                        {result.corrected_response}
-                      </p>
-                      {result.changes_made && result.changes_made.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-[#10b981]">
-                          <p className="text-xs font-semibold text-black mb-2">Changes Made:</p>
-                          <ul className="list-disc list-inside text-xs text-black/80 space-y-1">
-                            {result.changes_made.map((change, idx) => (
-                              <li key={idx}>{change}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  {result.correction_suggested &&
+                    result.corrected_response &&
+                    (result.corrected_response.trim() === result.ai_response.trim() || result.validation_result.violations.length === 0) && (
+                      <div className="p-4 bg-[#f0fdf4] border border-[#10b981]">
+                        <h3 className="text-sm font-semibold text-black mb-3 flex items-center gap-2">
+                          <CheckCircle size={16} className="text-[#10b981]" />
+                          Corrected Response
+                        </h3>
+                        <p className="text-sm text-black whitespace-pre-wrap leading-relaxed mb-3">
+                          {result.corrected_response}
+                        </p>
+                        {result.changes_made && result.changes_made.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-[#10b981]">
+                            <p className="text-xs font-semibold text-black mb-2">Changes Made:</p>
+                            <ul className="list-disc list-inside text-xs text-black/80 space-y-1">
+                              {result.changes_made.map((change, idx) => (
+                                <li key={idx}>{change}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                   {/* Explanation */}
                   <div className="p-4 bg-[#f5f5f5] border border-[#e5e5e5]">
