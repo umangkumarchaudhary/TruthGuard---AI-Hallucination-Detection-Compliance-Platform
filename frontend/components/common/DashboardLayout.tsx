@@ -23,7 +23,8 @@ import {
   Github,
   ChevronDown,
   ChevronUp,
-  Home
+  Home,
+  Book
 } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -40,7 +41,9 @@ const navigation = [
   { name: 'Policies', href: '/policies', icon: FileText },
   { name: 'Compliance Rules', href: '/compliance-rules', icon: Shield },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Badge Generator', href: '/badge', icon: Badge },
+  { name: 'Docs', href: '/docs', icon: Book },
+  { name: 'About', href: '/about', icon: Info },
+  { name: 'Badge', href: '/badge', icon: Badge },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 

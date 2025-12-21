@@ -6,7 +6,23 @@ import DashboardLayout from '@/components/common/DashboardLayout'
 import SeverityBadge from '@/components/common/SeverityBadge'
 import ResponseComparison from '@/components/comparison/ResponseComparison'
 import { apiClient } from '@/lib/api-client'
-import { ArrowLeft, AlertTriangle, CheckCircle, XCircle, ExternalLink } from 'lucide-react'
+import { useTheme } from '@/lib/theme-provider'
+import {
+  ArrowLeft,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  ExternalLink,
+  Clock,
+  Shield,
+  FileCheck,
+  Brain,
+  Zap,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Check
+} from 'lucide-react'
 
 interface ConfidenceBreakdown {
   score: number
@@ -71,8 +87,11 @@ interface InteractionDetail {
 export default function InteractionDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { theme } = useTheme()
   const [data, setData] = useState<InteractionDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['query', 'violations', 'verification', 'breakdown']))
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (params.id) {
@@ -94,12 +113,42 @@ export default function InteractionDetailPage() {
     }
   }
 
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(section)) {
+        newSet.delete(section)
+      } else {
+        newSet.add(section)
+      }
+      return newSet
+    })
+  }
+
+  const copyId = () => {
+    navigator.clipboard.writeText(params.id as string)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   if (loading) {
     return (
       <DashboardLayout>
         <div className="p-4 lg:p-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-black">Loading...</div>
+          <div className="animate-pulse space-y-6">
+            <div className="h-10 w-48 rounded" style={{ background: 'var(--background-tertiary)' }} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="premium-card p-6">
+                  <div className="h-4 w-20 rounded mb-2" style={{ background: 'var(--background-tertiary)' }} />
+                  <div className="h-8 w-24 rounded" style={{ background: 'var(--background-tertiary)' }} />
+                </div>
+              ))}
+            </div>
+            <div className="premium-card p-6">
+              <div className="h-6 w-40 rounded mb-4" style={{ background: 'var(--background-tertiary)' }} />
+              <div className="h-24 w-full rounded" style={{ background: 'var(--background-tertiary)' }} />
+            </div>
           </div>
         </div>
       </DashboardLayout>
@@ -110,8 +159,16 @@ export default function InteractionDetailPage() {
     return (
       <DashboardLayout>
         <div className="p-4 lg:p-8">
-          <div className="text-center py-12">
-            <p className="text-black">Interaction not found</p>
+          <div className="premium-card text-center py-12">
+            <AlertTriangle size={48} className="mx-auto mb-4 opacity-30" style={{ color: 'var(--foreground-muted)' }} />
+            <p className="text-lg font-semibold mb-2" style={{ color: 'var(--foreground)' }}>Interaction not found</p>
+            <button
+              onClick={() => router.back()}
+              className="mt-4 px-6 py-2 text-sm font-medium"
+              style={{ background: 'var(--accent-gradient)', color: 'white' }}
+            >
+              Go Back
+            </button>
           </div>
         </div>
       </DashboardLayout>
@@ -120,219 +177,354 @@ export default function InteractionDetailPage() {
 
   const { interaction, violations, verification_results, citations, explanation } = data
 
+  const getScoreColor = (score: number) => {
+    if (score >= 0.8) return 'var(--success)'
+    if (score >= 0.6) return '#3b82f6'
+    if (score >= 0.4) return 'var(--warning)'
+    return 'var(--danger)'
+  }
+
   return (
     <DashboardLayout>
       <div className="p-4 lg:p-8">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-2 text-black hover:text-black/60 mb-6"
-        >
-          <ArrowLeft size={18} />
-          <span>Back to Interactions</span>
-        </button>
+        {/* Back Button & Header */}
+        <div className="mb-6 animate-slide-down">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-sm font-medium mb-4 transition-colors"
+            style={{ color: 'var(--foreground-muted)' }}
+          >
+            <ArrowLeft size={18} />
+            <span>Back to Interactions</span>
+          </button>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-black mb-2">Interaction Details</h1>
-          <p className="text-sm text-black/60">
-            {new Date(interaction.timestamp).toLocaleString()}
-          </p>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>
+                Interaction Details
+              </h1>
+              <div className="flex items-center gap-3 flex-wrap text-sm" style={{ color: 'var(--foreground-muted)' }}>
+                <span className="flex items-center gap-1">
+                  <Clock size={14} />
+                  {new Date(interaction.timestamp).toLocaleString()}
+                </span>
+                <button
+                  onClick={copyId}
+                  className="flex items-center gap-1 px-2 py-0.5 text-xs font-mono transition-colors"
+                  style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)' }}
+                >
+                  {copied ? <Check size={12} /> : <Copy size={12} />}
+                  {(params.id as string).slice(0, 8)}...
+                </button>
+              </div>
+            </div>
+            <StatusBadge status={interaction.status} />
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Status Card */}
-          <div className="bg-white border border-[#e5e5e5] p-6">
-            <h3 className="text-sm font-medium text-black/60 mb-2">Status</h3>
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="premium-card p-5">
+            <div className="flex items-center gap-3 mb-2">
+              <Shield size={18} style={{ color: 'var(--accent)' }} />
+              <span className="text-sm font-medium" style={{ color: 'var(--foreground-muted)' }}>Status</span>
+            </div>
             <StatusBadge status={interaction.status} />
           </div>
 
-          {/* Confidence Card */}
-          <div className="bg-white border border-[#e5e5e5] p-6">
-            <h3 className="text-sm font-medium text-black/60 mb-2">Confidence Score</h3>
-            <p className="text-2xl font-bold text-black">
-              {(interaction.confidence_score * 100).toFixed(0)}%
-            </p>
+          <div className="premium-card p-5">
+            <div className="flex items-center gap-3 mb-2">
+              <Zap size={18} style={{ color: getScoreColor(interaction.confidence_score) }} />
+              <span className="text-sm font-medium" style={{ color: 'var(--foreground-muted)' }}>Confidence</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <p className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
+                {(interaction.confidence_score * 100).toFixed(0)}%
+              </p>
+              <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'var(--background-tertiary)' }}>
+                <div
+                  className="h-full transition-all"
+                  style={{ width: `${interaction.confidence_score * 100}%`, background: getScoreColor(interaction.confidence_score) }}
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Violations Card */}
-          <div className="bg-white border border-[#e5e5e5] p-6">
-            <h3 className="text-sm font-medium text-black/60 mb-2">Violations</h3>
-            <p className="text-2xl font-bold text-black">{violations.length}</p>
+          <div className="premium-card p-5">
+            <div className="flex items-center gap-3 mb-2">
+              <AlertTriangle size={18} style={{ color: violations.length > 0 ? 'var(--danger)' : 'var(--success)' }} />
+              <span className="text-sm font-medium" style={{ color: 'var(--foreground-muted)' }}>Violations</span>
+            </div>
+            <p
+              className="text-2xl font-bold"
+              style={{ color: violations.length > 0 ? 'var(--danger)' : 'var(--success)' }}
+            >
+              {violations.length}
+            </p>
           </div>
         </div>
 
         {/* Query and Response */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white border border-[#e5e5e5] p-6">
-            <h3 className="text-lg font-semibold text-black mb-4">User Query</h3>
-            <p className="text-sm text-black whitespace-pre-wrap">{interaction.user_query}</p>
+        <CollapsibleSection
+          title="Query & Response"
+          icon={Brain}
+          expanded={expandedSections.has('query')}
+          onToggle={() => toggleSection('query')}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="p-4" style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)' }}>
+              <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--foreground-muted)' }}>User Query</h4>
+              <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--foreground)' }}>
+                {interaction.user_query}
+              </p>
+            </div>
+            <div className="p-4" style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)' }}>
+              <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--foreground-muted)' }}>AI Response</h4>
+              <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--foreground)' }}>
+                {interaction.ai_response}
+              </p>
+            </div>
           </div>
-
-          <div className="bg-white border border-[#e5e5e5] p-6">
-            <h3 className="text-lg font-semibold text-black mb-4">AI Response</h3>
-            <p className="text-sm text-black whitespace-pre-wrap">{interaction.ai_response}</p>
-          </div>
-        </div>
+        </CollapsibleSection>
 
         {/* Side-by-Side Comparison */}
-        {interaction.validated_response && 
-         interaction.validated_response.trim() !== interaction.ai_response.trim() && 
-         violations.length > 0 && (
-          <ResponseComparison
-            originalResponse={interaction.ai_response}
-            correctedResponse={interaction.validated_response}
-            violations={violations.map(v => ({
-              type: v.violation_type,
-              severity: v.severity,
-              description: v.description
-            }))}
-            verificationResults={verification_results.map(r => ({
-              claim_text: r.claim_text,
-              verification_status: r.verification_status,
-              source: r.source ?? undefined,
-              url: r.url ?? undefined,
-              details: r.details ?? undefined
-            }))}
-          />
-        )}
+        {interaction.validated_response &&
+          interaction.validated_response.trim() !== interaction.ai_response.trim() &&
+          violations.length > 0 && (
+            <div className="mb-4">
+              <ResponseComparison
+                originalResponse={interaction.ai_response}
+                correctedResponse={interaction.validated_response}
+                violations={violations.map(v => ({
+                  type: v.violation_type,
+                  severity: v.severity,
+                  description: v.description
+                }))}
+                verificationResults={verification_results.map(r => ({
+                  claim_text: r.claim_text,
+                  verification_status: r.verification_status,
+                  source: r.source ?? undefined,
+                  url: r.url ?? undefined,
+                  details: r.details ?? undefined
+                }))}
+              />
+            </div>
+          )}
 
-        {/* Validated Response (fallback if no comparison shown) */}
-        {interaction.validated_response && 
-         (interaction.validated_response.trim() === interaction.ai_response.trim() || violations.length === 0) && (
-          <div className="bg-white border border-[#e5e5e5] p-6 mb-6">
-            <h3 className="text-lg font-semibold text-black mb-4">Validated Response</h3>
-            <p className="text-sm text-black whitespace-pre-wrap">{interaction.validated_response}</p>
-          </div>
+        {/* Confidence Breakdown */}
+        {interaction.confidence_breakdown && (
+          <CollapsibleSection
+            title="Confidence Score Breakdown"
+            icon={FileCheck}
+            expanded={expandedSections.has('breakdown')}
+            onToggle={() => toggleSection('breakdown')}
+          >
+            <div className="space-y-4">
+              {Object.entries(interaction.confidence_breakdown)
+                .filter(([key]) => key !== 'contributions')
+                .map(([key, component]: [string, any]) => {
+                  if (!component || typeof component !== 'object' || !component.score) return null
+
+                  const scorePercent = component.score * 100
+
+                  return (
+                    <div key={key} className="p-4" style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)' }}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <p className="font-semibold" style={{ color: 'var(--foreground)' }}>{component.label}</p>
+                          <p className="text-xs" style={{ color: 'var(--foreground-muted)' }}>{component.description}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold" style={{ color: getScoreColor(component.score) }}>
+                            {scorePercent.toFixed(0)}%
+                          </p>
+                          <p className="text-xs" style={{ color: 'var(--foreground-muted)' }}>
+                            {(component.weight * 100).toFixed(0)}% weight
+                          </p>
+                        </div>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+                        <div
+                          className="h-full transition-all"
+                          style={{ width: `${scorePercent}%`, background: getScoreColor(component.score) }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+
+              {/* Contributions */}
+              {interaction.confidence_breakdown.contributions && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {interaction.confidence_breakdown.contributions.positive_factors?.length > 0 && (
+                    <div className="p-4" style={{ background: 'var(--success-bg)', border: '1px solid var(--success)' }}>
+                      <p className="text-sm font-semibold mb-2" style={{ color: 'var(--success)' }}>✓ Positive Factors</p>
+                      <ul className="space-y-1">
+                        {interaction.confidence_breakdown.contributions.positive_factors.map((f, i) => (
+                          <li key={i} className="text-xs" style={{ color: 'var(--foreground-secondary)' }}>• {f}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {interaction.confidence_breakdown.contributions.negative_factors?.length > 0 && (
+                    <div className="p-4" style={{ background: 'var(--warning-bg)', border: '1px solid var(--warning)' }}>
+                      <p className="text-sm font-semibold mb-2" style={{ color: 'var(--warning)' }}>⚠ Areas for Improvement</p>
+                      <ul className="space-y-1">
+                        {interaction.confidence_breakdown.contributions.negative_factors.map((f, i) => (
+                          <li key={i} className="text-xs" style={{ color: 'var(--foreground-secondary)' }}>• {f}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </CollapsibleSection>
         )}
 
         {/* Violations */}
         {violations.length > 0 && (
-          <div className="bg-white border border-[#e5e5e5] p-6 mb-6">
-            <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
-              <AlertTriangle size={20} />
-              Violations ({violations.length})
-            </h3>
+          <CollapsibleSection
+            title={`Violations (${violations.length})`}
+            icon={AlertTriangle}
+            expanded={expandedSections.has('violations')}
+            onToggle={() => toggleSection('violations')}
+            iconColor="var(--danger)"
+          >
             <div className="space-y-3">
               {violations.map((violation) => (
-                <div key={violation.id} className="border-l-4 border-[#dc2626] pl-4 py-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-semibold text-black">{violation.violation_type}</span>
+                <div
+                  key={violation.id}
+                  className="p-4"
+                  style={{ borderLeft: '4px solid var(--danger)', background: 'var(--danger-bg)', border: '1px solid var(--danger)' }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-semibold capitalize" style={{ color: 'var(--foreground)' }}>
+                      {violation.violation_type.replace(/_/g, ' ')}
+                    </span>
                     <SeverityBadge severity={violation.severity as 'critical' | 'high' | 'medium' | 'low'} />
                   </div>
-                  <p className="text-sm text-black/80">{violation.description}</p>
+                  <p className="text-sm" style={{ color: 'var(--foreground-secondary)' }}>{violation.description}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
         )}
 
         {/* Verification Results */}
         {verification_results.length > 0 && (
-          <div className="bg-white border border-[#e5e5e5] p-6 mb-6">
-            <h3 className="text-lg font-semibold text-black mb-4">Fact Verification</h3>
-            <div className="space-y-4">
+          <CollapsibleSection
+            title={`Fact Verification (${verification_results.length})`}
+            icon={CheckCircle}
+            expanded={expandedSections.has('verification')}
+            onToggle={() => toggleSection('verification')}
+            iconColor="var(--success)"
+          >
+            <div className="space-y-3">
               {verification_results.map((result) => (
-                <div key={result.id} className="border border-[#e5e5e5] p-4">
-                  <div className="flex items-start gap-3 mb-2">
+                <div key={result.id} className="p-4" style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)' }}>
+                  <div className="flex items-start gap-3">
                     {result.verification_status === 'verified' ? (
-                      <CheckCircle className="text-[#10b981] flex-shrink-0 mt-0.5" size={20} />
+                      <CheckCircle size={20} style={{ color: 'var(--success)', flexShrink: 0, marginTop: 2 }} />
                     ) : result.verification_status === 'false' ? (
-                      <XCircle className="text-[#dc2626] flex-shrink-0 mt-0.5" size={20} />
+                      <XCircle size={20} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: 2 }} />
                     ) : (
-                      <AlertTriangle className="text-[#f59e0b] flex-shrink-0 mt-0.5" size={20} />
+                      <AlertTriangle size={20} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: 2 }} />
                     )}
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-black mb-1">{result.claim_text}</p>
-                      <div className="flex items-center gap-3 flex-wrap mt-2">
-                        <span className={`text-xs font-medium px-2 py-1 ${
-                          result.verification_status === 'verified' 
-                            ? 'bg-[#10b981]/10 text-[#10b981]' 
-                            : result.verification_status === 'false'
-                            ? 'bg-[#dc2626]/10 text-[#dc2626]'
-                            : 'bg-[#f59e0b]/10 text-[#f59e0b]'
-                        }`}>
+                      <p className="font-medium mb-2" style={{ color: 'var(--foreground)' }}>{result.claim_text}</p>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span
+                          className="text-xs font-semibold px-2 py-1"
+                          style={{
+                            background: result.verification_status === 'verified' ? 'var(--success-bg)' :
+                              result.verification_status === 'false' ? 'var(--danger-bg)' : 'var(--warning-bg)',
+                            color: result.verification_status === 'verified' ? 'var(--success)' :
+                              result.verification_status === 'false' ? 'var(--danger)' : 'var(--warning)'
+                          }}
+                        >
                           {result.verification_status.toUpperCase()}
                         </span>
-                        <span className="text-xs text-black/60">
-                          Confidence: {(result.confidence * 100).toFixed(0)}%
+                        <span className="text-xs" style={{ color: 'var(--foreground-muted)' }}>
+                          {(result.confidence * 100).toFixed(0)}% confidence
                         </span>
                         {result.source && (
-                          <span className="text-xs text-black/60">
-                            Source: <span className="font-medium capitalize">{result.source}</span>
+                          <span className="text-xs capitalize" style={{ color: 'var(--foreground-muted)' }}>
+                            Source: {result.source}
                           </span>
                         )}
                       </div>
+                      {result.details && (
+                        <p className="text-xs mt-2 leading-relaxed" style={{ color: 'var(--foreground-secondary)' }}>
+                          {result.details}
+                        </p>
+                      )}
+                      {result.url && (
+                        <a
+                          href={result.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs mt-2"
+                          style={{ color: 'var(--accent)' }}
+                        >
+                          View source <ExternalLink size={12} />
+                        </a>
+                      )}
                     </div>
                   </div>
-                  
-                  {/* Source Details */}
-                  {result.details && (
-                    <div className="mt-3 pt-3 border-t border-[#e5e5e5]">
-                      <p className="text-xs text-black/80 mb-2">
-                        <span className="font-medium">Verification Details:</span>
-                      </p>
-                      <p className="text-xs text-black/70 leading-relaxed">{result.details}</p>
-                    </div>
-                  )}
-                  
-                  {/* Source URL */}
-                  {result.url && (
-                    <div className="mt-2">
-                      <a
-                        href={result.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-black/60 hover:text-black flex items-center gap-1"
-                      >
-                        View source
-                        <ExternalLink size={12} />
-                      </a>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
         )}
 
         {/* Citations */}
         {citations.length > 0 && (
-          <div className="bg-white border border-[#e5e5e5] p-6 mb-6">
-            <h3 className="text-lg font-semibold text-black mb-4">Citations</h3>
+          <CollapsibleSection
+            title={`Citations (${citations.length})`}
+            icon={ExternalLink}
+            expanded={expandedSections.has('citations')}
+            onToggle={() => toggleSection('citations')}
+          >
             <div className="space-y-2">
               {citations.map((citation) => (
-                <div key={citation.id} className="flex items-center gap-3 p-3 border border-[#e5e5e5]">
+                <div
+                  key={citation.id}
+                  className="flex items-center gap-3 p-3"
+                  style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)' }}
+                >
                   {citation.is_valid ? (
-                    <CheckCircle className="text-[#10b981] flex-shrink-0" size={18} />
+                    <CheckCircle size={18} style={{ color: 'var(--success)', flexShrink: 0 }} />
                   ) : (
-                    <XCircle className="text-[#dc2626] flex-shrink-0" size={18} />
+                    <XCircle size={18} style={{ color: 'var(--danger)', flexShrink: 0 }} />
                   )}
                   <a
                     href={citation.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-black hover:text-black/60 flex items-center gap-1"
+                    className="text-sm flex items-center gap-1 truncate flex-1"
+                    style={{ color: 'var(--accent)' }}
                   >
                     {citation.url}
-                    <ExternalLink size={14} />
                   </a>
                   {citation.http_status_code && (
-                    <span className="text-xs text-black/60">({citation.http_status_code})</span>
+                    <span className="text-xs" style={{ color: 'var(--foreground-muted)' }}>
+                      ({citation.http_status_code})
+                    </span>
                   )}
                 </div>
               ))}
             </div>
-          </div>
+          </CollapsibleSection>
         )}
 
         {/* Explanation */}
         {explanation && (
-          <div className="bg-white border border-[#e5e5e5] p-6">
-            <h3 className="text-lg font-semibold text-black mb-4">Explanation</h3>
-            <div className="prose prose-sm max-w-none">
-              <pre className="text-sm text-black whitespace-pre-wrap font-sans">
-                {explanation.summary}
-              </pre>
-            </div>
+          <div className="premium-card p-6">
+            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--foreground)' }}>Explanation</h3>
+            <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--foreground-secondary)' }}>
+              {explanation.summary}
+            </p>
           </div>
         )}
       </div>
@@ -341,17 +533,63 @@ export default function InteractionDetailPage() {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const colors = {
-    approved: 'bg-[#10b981] text-white',
-    flagged: 'bg-[#f59e0b] text-white',
-    blocked: 'bg-[#dc2626] text-white',
+  const configs = {
+    approved: { bg: 'var(--success-bg)', color: 'var(--success)', icon: CheckCircle },
+    flagged: { bg: 'var(--warning-bg)', color: 'var(--warning)', icon: AlertTriangle },
+    blocked: { bg: 'var(--danger-bg)', color: 'var(--danger)', icon: XCircle },
   }
 
+  const config = configs[status as keyof typeof configs] || { bg: 'var(--background-tertiary)', color: 'var(--foreground)', icon: Shield }
+  const Icon = config.icon
+
   return (
-    <span className={`px-3 py-1 text-xs font-medium ${colors[status as keyof typeof colors] || 'bg-black text-white'}`}>
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold"
+      style={{ background: config.bg, color: config.color }}
+    >
+      <Icon size={14} />
       {status.toUpperCase()}
     </span>
   )
 }
 
-
+function CollapsibleSection({
+  title,
+  icon: Icon,
+  expanded,
+  onToggle,
+  children,
+  iconColor
+}: {
+  title: string
+  icon: any
+  expanded: boolean
+  onToggle: () => void
+  children: React.ReactNode
+  iconColor?: string
+}) {
+  return (
+    <div className="premium-card mb-4 overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full p-4 flex items-center justify-between transition-colors"
+        style={{ background: expanded ? 'var(--background-tertiary)' : 'transparent' }}
+      >
+        <h3 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
+          <Icon size={20} style={{ color: iconColor || 'var(--accent)' }} />
+          {title}
+        </h3>
+        {expanded ? (
+          <ChevronUp size={20} style={{ color: 'var(--foreground-muted)' }} />
+        ) : (
+          <ChevronDown size={20} style={{ color: 'var(--foreground-muted)' }} />
+        )}
+      </button>
+      {expanded && (
+        <div className="p-4" style={{ borderTop: '1px solid var(--border)' }}>
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}

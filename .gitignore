@@ -45,3 +45,31 @@ yarn-error.log*
 *.tmp
 *.temp
 
+# Internal Documentation (keep only README.md)
+CHECKLIST.md
+CONFIDENCE_*.md
+CONTEXT_*.md
+CORS_*.md
+DATABASE_*.md
+DEPLOYMENT_*.md
+DETECTION_*.md
+DEVELOPMENT_*.md
+DEVOPS_*.md
+ENV_*.md
+FEATURES_*.md
+FUNCTION_*.md
+FaeturesNeedToBeAdded.md
+GEMINI_*.md
+MAKING_*.md
+NETLIFY_*.md
+NEXT_STEPS.md
+PHASE_*.md
+POLICY_*.md
+PROJECT_*.md
+QUICK_*.md
+REALTIME_*.md
+SETUP_*.md
+SMART_*.md
+TESTING_*.md
+TEST_*.md
+VERIFICATION_*.md

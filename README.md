@@ -1,180 +1,343 @@
-# TruthGuard
-## AI Hallucination Detection & Compliance Platform
+<div align="center">
 
-> **Monitor AI outputs in real-time. Detect hallucinations. Ensure compliance. Provide audit trails for regulators.**
+# 🛡️ TruthGuard
 
-[![Status](https://img.shields.io/badge/status-production--ready-brightgreen)]()
-[![Python](https://img.shields.io/badge/python-3.10+-blue)]()
-[![Next.js](https://img.shields.io/badge/next.js-16-black)]()
-[![FastAPI](https://img.shields.io/badge/fastapi-0.115-green)]()
+### AI Hallucination Detection & Compliance Platform
+
+**Monitor AI outputs in real-time. Detect hallucinations. Ensure compliance. Provide audit trails for regulators.**
+
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-00C853?style=for-the-badge)](https://truthguard-ai.vercel.app)
+[![Backend API](https://img.shields.io/badge/⚡_API-Render-6366F1?style=for-the-badge)](https://truthguard-api.onrender.com)
+
+<br/>
+
+[![Next.js](https://img.shields.io/badge/Next.js_16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Python](https://img.shields.io/badge/Python_3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Google Gemini](https://img.shields.io/badge/Gemini_Pro-4285F4?style=flat-square&logo=google&logoColor=white)](https://cloud.google.com/vertex-ai)
+
+<br/>
+
+![TruthGuard Dashboard](https://img.shields.io/badge/Status-Production_Ready-brightgreen?style=for-the-badge)
+
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [The Problem](#-the-problem)
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [System Architecture](#-system-architecture)
+- [Detection Pipeline](#-detection-pipeline)
+- [Screenshots](#-screenshots)
+- [Quick Start](#-quick-start)
+- [API Reference](#-api-reference)
+- [Project Structure](#-project-structure)
+- [Use Cases](#-use-cases)
+- [Contributing](#-contributing)
+- [Contact](#-contact)
 
 ---
 
 ## 🎯 Overview
 
-**TruthGuard** is a comprehensive platform that monitors AI system outputs in real-time, detects hallucinations, flags non-compliant responses, and provides complete audit trails for regulatory compliance. Built to solve the critical 2024-2025 problem of AI reliability and regulatory compliance.
+**TruthGuard** is an enterprise-grade AI safety platform that validates AI responses in real-time, detects hallucinations, ensures compliance, and provides complete audit trails for regulatory requirements.
 
-### The Problem
+In an era where AI systems are making critical decisions in finance, healthcare, legal, and customer service domains, TruthGuard ensures these AI outputs are **accurate**, **compliant**, and **auditable**.
 
-Companies deploying AI systems face massive challenges:
-- **AI hallucinations** - AI makes up facts, gives wrong information
-- **Regulatory compliance** - EU AI Act, SEC rules require explainable AI
-- **Legal liability** - Wrong AI advice creates legal problems
-- **Customer trust** - Incorrect information damages brand reputation
+<div align="center">
 
-### The Solution
+| ✅ Real-Time Validation | 🔍 Hallucination Detection | 📋 Compliance Checking | 📊 Audit Trails |
+|:-----------------------:|:--------------------------:|:----------------------:|:--------------:|
+| Sub-second response validation | Multi-source fact verification | EU AI Act, SEC, GDPR | Complete interaction logging |
 
-TruthGuard sits between AI systems and users, validating every response:
-- ✅ **Detects hallucinations** - Verifies factual claims
-- ✅ **Ensures compliance** - Checks against regulations (SEC, EU AI Act, GDPR)
-- ✅ **Validates citations** - Verifies URLs and sources
-- ✅ **Provides audit trails** - Complete logs for regulators
-- ✅ **Auto-corrects** - Suggests compliant alternatives
+</div>
+
+---
+
+## 🚨 The Problem
+
+Companies deploying AI systems face **massive challenges** in 2024-2025:
+
+<table>
+<tr>
+<td width="50%">
+
+### Without TruthGuard ❌
+- 🤥 AI makes up facts (hallucinations)
+- ⚖️ Regulatory violations (EU AI Act, SEC)
+- 💼 Legal liability from wrong advice
+- 🔒 No audit trail for compliance
+- 😤 Customer trust erosion
+
+</td>
+<td width="50%">
+
+### With TruthGuard ✅
+- ✔️ Every response fact-checked
+- ✔️ Automatic compliance validation
+- ✔️ Corrections suggested in real-time
+- ✔️ Complete audit logs for regulators
+- ✔️ Confidence scores for transparency
+
+</td>
+</tr>
+</table>
 
 ---
 
 ## ✨ Key Features
 
 ### 🔍 Real-Time Hallucination Detection
-- **NLP-based claim extraction** - Identifies factual statements
-- **Fact verification** - Checks claims against knowledge bases
+- **NLP-based claim extraction** using spaCy
+- **Multi-source fact verification** via Wikipedia, DuckDuckGo, NewsAPI
 - **Citation validation** - Verifies URLs and source authenticity
 - **Consistency checking** - Detects contradictions in responses
-- **Confidence scoring** - 0-100% reliability score
+- **Confidence scoring** - Transparent 0-100% reliability metric
 
 ### 🛡️ Compliance & Policy Engine
-- **Regulatory rules** - Pre-built templates (EU AI Act, SEC, CFPB, GDPR, DOT)
-- **Company policies** - Custom policy matching
-- **Rule engine** - Flexible JSON-based rule definitions
-- **Violation detection** - Real-time compliance checking
-- **Auto-correction** - Suggests compliant alternatives
+- **Pre-built regulatory templates** - EU AI Act, SEC, CFPB, GDPR, DOT
+- **Custom company policies** - Organization-specific rules
+- **Real-time violation detection** - Immediate flagging
+- **Auto-correction** - AI-powered compliant alternatives using Gemini Pro
 
 ### 📊 Complete Audit Trail
-- **Comprehensive logging** - Every interaction logged with full context
-- **Human-readable explanations** - Why responses were approved/flagged
+- **Comprehensive logging** - Every interaction with full context
+- **Human-readable explanations** - Clear "why" for every decision
 - **Queryable logs** - Search and filter for regulatory review
-- **Export functionality** - CSV/JSON export for compliance reports
-- **Complete traceability** - Full audit trail for each interaction
+- **Export functionality** - CSV/JSON for compliance reports
 
 ### 🎨 Premium Dashboard
-- **Apple-inspired minimalism** - Clean, sharp, premium design
+- **Modern glassmorphism UI** - Premium look and feel
+- **Light/Dark mode** - Complete theme system
 - **Real-time metrics** - Live monitoring of AI interactions
-- **Advanced analytics** - Charts, trends, and insights
 - **Mobile responsive** - Works perfectly on all devices
-- **Complete management UI** - Policies, rules, violations, interactions
+- **Interactive analytics** - Charts, trends, and insights
 
 ---
 
-## 🏗️ Architecture
+## 🛠️ Tech Stack
+
+<div align="center">
+
+### Frontend
+| Technology | Purpose |
+|:----------:|:-------:|
+| ![Next.js](https://img.shields.io/badge/Next.js_16-black?style=for-the-badge&logo=next.js) | React Framework |
+| ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white) | Type Safety |
+| ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white) | Styling |
+| ![Recharts](https://img.shields.io/badge/Recharts-FF6384?style=for-the-badge) | Data Visualization |
+
+### Backend
+| Technology | Purpose |
+|:----------:|:-------:|
+| ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white) | API Framework |
+| ![Python](https://img.shields.io/badge/Python_3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white) | Core Language |
+| ![spaCy](https://img.shields.io/badge/spaCy-09A3D5?style=for-the-badge) | NLP Processing |
+| ![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge) | Data Validation |
+
+### Infrastructure
+| Technology | Purpose |
+|:----------:|:-------:|
+| ![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white) | Database (PostgreSQL) |
+| ![Vercel](https://img.shields.io/badge/Vercel-black?style=for-the-badge&logo=vercel) | Frontend Hosting |
+| ![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white) | Backend Hosting |
+| ![Gemini](https://img.shields.io/badge/Gemini_Pro-4285F4?style=for-the-badge&logo=google&logoColor=white) | AI Corrections |
+
+</div>
+
+---
+
+## 🏗️ System Architecture
 
 ```
-┌─────────────────┐
-│   AI System     │ (External - Customer's AI)
-│  (Chatbot/LLM)  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────────────────────────────┐
-│         TruthGuard Platform             │
-│                                         │
-│  ┌──────────────┐    ┌──────────────┐  │
-│  │  Next.js     │    │  FastAPI     │  │
-│  │  Frontend    │◄──►│  Backend     │  │
-│  │  Dashboard   │    │  (Python)    │  │
-│  └──────────────┘    └──────┬───────┘  │
-│         │                   │          │
-│         └───────────────────┼──────────┘
-│                             │
-│         ┌───────────────────┼──────────┐
-│         │                   │          │
-│         ▼                   ▼          ▼
-│  ┌──────────────┐   ┌──────────────┐   │
-│  │  Supabase    │   │  External    │   │
-│  │  PostgreSQL  │   │  APIs        │   │
-│  │  (Audit)     │   │  (Fact Check)│   │
-│  └──────────────┘   └──────────────┘   │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        TruthGuard Platform                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   ┌──────────────┐         ┌──────────────────────────────────┐ │
+│   │   Frontend   │         │           Backend (FastAPI)       │ │
+│   │   Next.js    │◄───────►│                                   │ │
+│   │   Vercel     │   API   │  ┌─────────────────────────────┐  │ │
+│   └──────────────┘         │  │    Detection Pipeline       │  │ │
+│                            │  │  ┌────────┐ ┌────────────┐  │  │ │
+│                            │  │  │ spaCy  │ │ Fact Check │  │  │ │
+│                            │  │  │  NLP   │ │   Multi-   │  │  │ │
+│                            │  │  │ Engine │ │   Source   │  │  │ │
+│                            │  │  └────────┘ └────────────┘  │  │ │
+│                            │  │  ┌────────┐ ┌────────────┐  │  │ │
+│                            │  │  │Comply  │ │  Gemini    │  │  │ │
+│                            │  │  │ Check  │ │  Correct   │  │  │ │
+│                            │  │  └────────┘ └────────────┘  │  │ │
+│                            │  └─────────────────────────────┘  │ │
+│                            └────────────────┬─────────────────┘ │
+│                                             │                    │
+│   ┌─────────────────────────────────────────┼──────────────────┐│
+│   │                    External Services    │                   ││
+│   │  ┌──────────┐  ┌──────────┐  ┌─────────┴─┐  ┌───────────┐  ││
+│   │  │ Supabase │  │Wikipedia │  │ DuckDuck- │  │  NewsAPI  │  ││
+│   │  │PostgreSQL│  │   API    │  │    Go     │  │           │  ││
+│   │  └──────────┘  └──────────┘  └───────────┘  └───────────┘  ││
+│   └─────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Request Flow
+---
 
-1. **User Query** → External AI System
-2. **AI Response** → TruthGuard API
-3. **TruthGuard Processing:**
-   - Extract claims → Verify facts → Check compliance → Validate citations
-4. **Decision:**
-   - ✅ Approved → Return to user
-   - 🚨 Flagged/Blocked → Return corrected response
-5. **Audit Log** → Database
-6. **Real-time Update** → Dashboard
+## 🔄 Detection Pipeline
+
+Every AI response goes through a **5-step validation pipeline**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          DETECTION PIPELINE                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌────┐│
+│  │   1️⃣    │───▶│   2️⃣    │───▶│   3️⃣    │───▶│   4️⃣    │───▶│ 5️⃣ ││
+│  │  Claim   │    │   Fact   │    │ Comply   │    │ Consist  │    │ De-││
+│  │  Extract │    │  Verify  │    │  Check   │    │  Check   │    │cide││
+│  └──────────┘    └──────────┘    └──────────┘    └──────────┘    └────┘│
+│       │               │               │               │            │    │
+│       ▼               ▼               ▼               ▼            ▼    │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌────┐│
+│  │  spaCy   │    │Wikipedia │    │ EU AI Act│    │ History  │    │ ✅ ││
+│  │   NLP    │    │DuckDuckGo│    │SEC, GDPR │    │  Match   │    │ ⚠️ ││
+│  │  Engine  │    │ NewsAPI  │    │  Custom  │    │Analysis  │    │ ❌ ││
+│  └──────────┘    └──────────┘    └──────────┘    └──────────┘    └────┘│
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+OUTCOMES:
+  ✅ APPROVED  - Response passes all checks
+  ⚠️ FLAGGED   - Minor issues, corrected response suggested  
+  ❌ BLOCKED   - Critical violations, response blocked
+```
+
+| Step | Name | Description |
+|:----:|:----:|:------------|
+| 1️⃣ | **Claim Extraction** | Uses spaCy NLP to identify factual statements |
+| 2️⃣ | **Fact Verification** | Queries Wikipedia, DuckDuckGo, NewsAPI for truth |
+| 3️⃣ | **Compliance Check** | Validates against EU AI Act, SEC, GDPR, company policies |
+| 4️⃣ | **Consistency Check** | Compares with historical responses for contradictions |
+| 5️⃣ | **Decision & Correct** | Approves, flags, or blocks with AI-generated corrections |
+
+---
+
+## 📸 Screenshots
+
+### Dashboard
+> Real-time monitoring with live metrics, charts, and AI interaction status
+
+### AI Test Lab
+> Generate and validate AI responses in real-time with detailed results
+
+### Live Demo
+> Interactive demonstration with various test cases showing detection in action
+
+### Analytics
+> Comprehensive data visualization with before/after comparisons
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-
-- **Node.js** 18+ 
+- **Node.js** 18+
 - **Python** 3.10+
 - **Supabase** account (free tier works)
 
 ### Installation
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/truthguard.git
-   cd truthguard
-   ```
+```bash
+# 1. Clone the repository
+git clone https://github.com/UmangKumarchaudhary/TruthGuard---AI-Hallucination-Detection-Compliance-Platform.git
+cd TruthGuard
 
-2. **Backend Setup:**
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+# 2. Backend Setup
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
 
-3. **Frontend Setup:**
-   ```bash
-   cd frontend
-   npm install
-   ```
+# 3. Frontend Setup
+cd ../frontend
+npm install
 
-4. **Environment Variables:**
-   
-   **Backend** (`backend/.env` or root `.env`):
-   ```env
-   SUPABASE_URL=https://your-project.supabase.co
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   ```
-   
-   **Frontend** (`frontend/.env.local`):
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-   NEXT_PUBLIC_API_URL=http://localhost:8000
-   ```
+# 4. Environment Variables
+# Backend (.env)
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_service_key
+GEMINI_API_KEY=your_gemini_key
 
-5. **Database Setup:**
-   - Go to Supabase SQL Editor
-   - Run `database/schema.sql`
-   - Verify all 9 tables are created
+# Frontend (.env.local)
+NEXT_PUBLIC_API_URL=http://localhost:8000
 
-6. **Run the Application:**
-   ```bash
-   # Terminal 1: Backend
-   cd backend
-   uvicorn app.main:app --reload
-   
-   # Terminal 2: Frontend
-   cd frontend
-   npm run dev
-   ```
+# 5. Run the Application
+# Terminal 1: Backend
+cd backend && uvicorn app.main:app --reload
 
-7. **Access the Application:**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Docs: http://localhost:8000/docs
+# Terminal 2: Frontend
+cd frontend && npm run dev
+```
+
+### Access Points
+| Service | URL |
+|:-------:|:---:|
+| 🌐 Frontend | http://localhost:3000 |
+| ⚡ Backend API | http://localhost:8000 |
+| 📚 API Docs | http://localhost:8000/docs |
+
+---
+
+## 📡 API Reference
+
+### Core Validation Endpoint
+
+```http
+POST /api/v1/validate
+```
+
+**Request:**
+```json
+{
+  "query": "What is Python?",
+  "ai_response": "Python is a programming language created in 1991...",
+  "organization_id": "org-uuid",
+  "ai_model": "gpt-4"
+}
+```
+
+**Response:**
+```json
+{
+  "status": "approved",
+  "confidence_score": 0.92,
+  "violations": [],
+  "validated_response": "...",
+  "explanation": "Response verified against multiple sources"
+}
+```
+
+### Key Endpoints
+
+| Method | Endpoint | Description |
+|:------:|:---------|:------------|
+| `POST` | `/api/v1/validate` | Validate AI response |
+| `POST` | `/api/v1/ai-test/generate` | Generate & validate with Gemini |
+| `GET` | `/api/v1/audit/interactions` | List all interactions |
+| `GET` | `/api/v1/audit/interactions/{id}` | Get interaction detail |
+| `GET` | `/api/v1/audit/violations` | List violations |
+| `GET` | `/api/v1/audit/stats` | Get analytics stats |
+| `GET` | `/api/v1/compliance/rules` | List compliance rules |
+| `GET` | `/api/v1/policies` | List company policies |
+
+📚 **Full API documentation:** [Live API Docs](https://truthguard-api.onrender.com/docs)
 
 ---
 
@@ -182,364 +345,144 @@ TruthGuard sits between AI systems and users, validating every response:
 
 ```
 TruthGuard/
-├── frontend/                 # Next.js application
-│   ├── app/                 # Pages and routes
-│   │   ├── dashboard/       # Main dashboard
-│   │   ├── interactions/    # Interaction logs
-│   │   ├── violations/      # Violations management
-│   │   ├── policies/        # Policy management
-│   │   ├── compliance-rules/# Compliance rules
-│   │   ├── analytics/       # Analytics page
-│   │   └── settings/        # Settings page
-│   ├── components/          # React components
-│   └── lib/                 # Utilities
-├── backend/                 # FastAPI application
-│   ├── app/
-│   │   ├── api/v1/         # API endpoints
-│   │   ├── services/        # Business logic
-│   │   │   ├── detection.py        # Hallucination detection
-│   │   │   ├── compliance.py       # Compliance checking
-│   │   │   ├── policy_matching.py  # Policy matching
-│   │   │   ├── audit.py            # Audit logging
-│   │   │   └── explanation.py      # Explanation generation
-│   │   └── utils/          # Utilities
-│   ├── scripts/            # Demo data seeding
-│   └── test_*.py          # Test suites
-├── database/               # Database schema
-│   └── schema.sql         # Complete database schema
-└── docs/                  # Documentation
-    ├── PHASE_*_COMPLETION.md
-    ├── DEPLOYMENT_GUIDE.md
-    └── TESTING_GUIDE.md
+├── 📂 frontend/                    # Next.js 16 Application
+│   ├── 📂 app/                    # App Router Pages
+│   │   ├── 📄 page.tsx            # Landing Page
+│   │   ├── 📂 dashboard/          # Main Dashboard
+│   │   ├── 📂 ai-test/            # AI Test Lab
+│   │   ├── 📂 live-demo/          # Interactive Demo
+│   │   ├── 📂 interactions/       # Interaction Logs
+│   │   ├── 📂 violations/         # Violation Management
+│   │   ├── 📂 policies/           # Policy Management
+│   │   ├── 📂 analytics/          # Analytics Dashboard
+│   │   ├── 📂 docs/               # Documentation Page
+│   │   └── 📂 about/              # About Page
+│   ├── 📂 components/             # Reusable Components
+│   ├── 📂 lib/                    # Utilities & Theme
+│   └── 📂 data/                   # Demo Test Cases
+│
+├── 📂 backend/                     # FastAPI Application
+│   ├── 📂 app/
+│   │   ├── 📂 api/v1/             # API Endpoints
+│   │   │   ├── 📄 validation.py   # Core Validation
+│   │   │   ├── 📄 audit.py        # Audit Endpoints
+│   │   │   └── 📄 compliance.py   # Compliance Rules
+│   │   ├── 📂 services/           # Business Logic
+│   │   │   ├── 📄 detection.py    # Hallucination Detection
+│   │   │   ├── 📄 compliance.py   # Compliance Engine
+│   │   │   ├── 📄 fact_verification.py # Fact Checking
+│   │   │   └── 📄 audit.py        # Audit Logging
+│   │   └── 📄 main.py             # FastAPI App
+│   └── 📂 scripts/                # Utility Scripts
+│
+├── 📂 database/                    # Database Schema
+│   └── 📄 schema.sql              # PostgreSQL Schema
+│
+└── 📄 README.md                    # This File
 ```
 
 ---
 
-## 🔌 API Endpoints
+## 🎬 Use Cases
 
-### Core Validation
+### 💰 Financial Services
+```
+Query: "Should I invest all my savings in crypto?"
+AI Response: "Yes, crypto always goes up!"
 
-**`POST /api/v1/validate`** - Main validation endpoint
-```json
-{
-  "query": "What's my credit limit?",
-  "ai_response": "Your credit limit is $50,000",
-  "ai_model": "gpt-4",
-  "organization_id": "org-id"
-}
+TruthGuard: ❌ BLOCKED
+- SEC Violation: No guarantee claims allowed
+- Hallucination: Historical crypto data shows volatility
+- Corrected: "Cryptocurrency is high-risk. Consult a licensed advisor."
 ```
 
-**Response:**
-```json
-{
-  "status": "flagged",
-  "confidence_score": 0.65,
-  "violations": [...],
-  "validated_response": "Please check your account...",
-  "explanation": "..."
-}
+### ✈️ Airlines & Travel
+```
+Query: "Can I get a refund for my cancelled flight?"
+AI Response: "Yes, full refund guaranteed within 24 hours!"
+
+TruthGuard: ⚠️ FLAGGED
+- Policy Violation: Refunds take 7-10 business days
+- DOT Compliance: Cannot guarantee timelines
+- Corrected: "Refunds typically process within 7-10 business days."
 ```
 
-### Audit & Analytics
+### 🏥 Healthcare
+```
+Query: "Is this medication safe for daily use?"
+AI Response: "Yes, 100% safe with no side effects!"
 
-- `GET /api/v1/audit/interactions` - List interactions
-- `GET /api/v1/audit/interactions/{id}` - Get audit trail
-- `GET /api/v1/audit/violations` - List violations
-- `GET /api/v1/audit/stats` - Get statistics
-- `GET /api/v1/audit/export` - Export data (CSV/JSON)
-
-### Compliance & Policies
-
-- `GET /api/v1/compliance/rules` - List compliance rules
-- `POST /api/v1/compliance/rules` - Create rule
-- `GET /api/v1/policies` - List policies
-- `POST /api/v1/policies` - Create policy
-
-**Full API Documentation:** http://localhost:8000/docs
+TruthGuard: ❌ BLOCKED
+- Medical Compliance: Cannot guarantee medication safety
+- Hallucination: All medications have potential side effects
+- Corrected: "Please consult your healthcare provider for personalized advice."
+```
 
 ---
 
-## 🧪 Testing
-
-### Run Integration Tests
-
-```bash
-cd backend
-python test_integration.py
-```
-
-### Seed Demo Data
-
-```bash
-cd backend
-python scripts/seed_demo_data.py
-```
-
-### Manual Testing
-
-See **[TESTING_GUIDE.md](./TESTING_GUIDE.md)** for complete testing procedures.
-
----
-
-## 🎬 Demo Scenarios
-
-### 1. Financial Services (AmEx/Barclays)
-**Scenario:** Investment advice chatbot
-- **Query:** "Should I invest all my savings in cryptocurrency?"
-- **AI Response:** "Yes, crypto always goes up. Invest all your savings."
-- **TruthGuard:** Blocks response, detects:
-  - Compliance violation (SEC - no guarantees)
-  - Hallucination (crypto doesn't always go up)
-  - Missing risk disclaimer
-- **Corrected:** "Cryptocurrency is high-risk. Consult a licensed advisor."
-
-### 2. Airlines (United)
-**Scenario:** Customer service chatbot
-- **Query:** "Can I get a refund for my canceled flight?"
-- **AI Response:** "Yes, full refund within 24 hours guaranteed."
-- **TruthGuard:** Flags response, detects:
-  - Policy violation (refunds take 7-10 days)
-  - Compliance violation (can't guarantee timeline)
-- **Corrected:** "Refunds typically process within 7-10 business days."
-
-### 3. Consulting (KPMG)
-**Scenario:** Research assistant AI
-- **Query:** "What does GDPR Article 25 require?"
-- **AI Response:** "GDPR Article 25 requires annual data deletion. [fake URL]"
-- **TruthGuard:** Flags response, detects:
-  - Hallucination (wrong interpretation)
-  - Fake citation (URL doesn't exist)
-- **Corrected:** Provides accurate GDPR Article 25 information.
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **Next.js 16** - React framework with App Router
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Utility-first styling
-- **Recharts** - Data visualization
-- **Lucide React** - Icons
-
-### Backend
-- **FastAPI** - Modern Python web framework
-- **Python 3.10+** - Programming language
-- **Pydantic** - Data validation
-- **spaCy** - NLP for claim extraction
-- **Supabase** - Database client
-
-### Database
-- **Supabase (PostgreSQL)** - Managed PostgreSQL database
-- **Row Level Security (RLS)** - Data security
-- **Real-time subscriptions** - Live updates
-
-### Infrastructure
-- **Supabase Auth** - Authentication
-- **API Key Authentication** - Service authentication
-- **CORS** - Cross-origin resource sharing
-
----
-
-## 📊 Project Status
-
-### ✅ Completed Phases
-
-- ✅ **Phase 1:** Foundation & Infrastructure
-- ✅ **Phase 2:** Core Detection Engine
-- ✅ **Phase 3:** Compliance & Policy Engine
-- ✅ **Phase 4:** Audit Trail & Logging
-- ✅ **Phase 5:** Frontend Dashboard
-- ✅ **Phase 6:** Integration & Testing
-
-**Status:** 🎉 **100% COMPLETE & DEPLOYMENT READY**
-
-### 📚 Documentation
-
-**Phase Completion Reports:**
-- [Phase 1: Foundation & Infrastructure](./PHASE_1_COMPLETION.md)
-- [Phase 2: Core Detection Engine](./PHASE_2_COMPLETION.md)
-- [Phase 3: Compliance & Policy Engine](./PHASE_3_COMPLETION.md)
-- [Phase 4: Audit Trail & Logging](./PHASE_4_COMPLETION.md)
-- [Phase 5: Frontend Dashboard](./PHASE_5_COMPLETION.md)
-- [Phase 6: Integration & Testing](./PHASE_6_COMPLETION.md)
-
-**Guides:**
-- [Deployment Guide](./DEPLOYMENT_GUIDE.md) - Production deployment
-- [Testing Guide](./TESTING_GUIDE.md) - Testing procedures
-- [Development Phases](./DEVELOPMENT_PHASES.md) - Development plan
-
----
-
-## 🚀 Deployment
-
-### Quick Deploy
-
-**Backend (Railway/Render):**
-```bash
-# Railway
-railway up
-
-# Render
-# Connect GitHub repo, auto-deploys
-```
-
-**Frontend (Vercel):**
-```bash
-vercel
-```
-
-**See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** for detailed instructions.
-
----
-
-## 💡 Why This Project?
+## 🏆 Why TruthGuard?
 
 ### Solves Real 2024-2025 Problems
 
-- **EU AI Act** - Requires explainable AI decisions
-- **SEC Rules** - Financial firms need AI compliance
-- **GDPR** - Data protection requirements
-- **Industry Need** - Every company using AI needs this
+| Regulation | Requirement | TruthGuard Solution |
+|:----------:|:-----------:|:-------------------:|
+| **EU AI Act** | Explainable AI decisions | Complete audit trails with explanations |
+| **SEC Rules** | AI compliance for financial services | Pre-built SEC templates |
+| **GDPR** | Data protection & transparency | Full interaction logging |
+| **Industry Need** | AI reliability at scale | Real-time validation pipeline |
 
-### Demonstrates Advanced Skills
+### Technical Excellence
 
-- ✅ **Full-stack development** - Frontend + Backend
-- ✅ **AI/ML integration** - NLP, fact verification
-- ✅ **Regulatory knowledge** - Compliance, audit trails
-- ✅ **System design** - Scalable architecture
-- ✅ **Production-ready** - Testing, documentation, deployment
-
-### Unique & Impressive
-
-- **Meta-level thinking** - Monitors AI systems, not just uses them
-- **Regulatory focus** - Rare in developer portfolios
-- **Complete solution** - End-to-end platform
-- **Production quality** - Ready for real-world use
-
----
-
-## 📈 Features in Detail
-
-### Detection Capabilities
-
-- **Claim Extraction:** NLP identifies factual statements
-- **Fact Verification:** Checks against knowledge bases
-- **Citation Validation:** Verifies URLs and sources
-- **Consistency Checking:** Detects contradictions
-- **Confidence Scoring:** 0-100% reliability metric
-
-### Compliance Features
-
-- **Regulatory Rules:** EU AI Act, SEC, CFPB, GDPR, DOT
-- **Policy Matching:** Company-specific policies
-- **Violation Detection:** Real-time compliance checking
-- **Auto-Correction:** Suggests compliant alternatives
-- **Rule Engine:** Flexible JSON-based rules
-
-### Audit & Reporting
-
-- **Complete Logging:** Every interaction logged
-- **Human Explanations:** Why decisions were made
-- **Queryable Logs:** Search and filter for regulators
-- **Export Functionality:** CSV/JSON for reports
-- **Full Traceability:** Complete audit trail
-
-### Dashboard Features
-
-- **Real-time Metrics:** Live monitoring
-- **Advanced Analytics:** Charts and trends
-- **Interaction Management:** View, search, filter
-- **Violation Tracking:** Severity-based filtering
-- **Policy Management:** CRUD operations
-- **Mobile Responsive:** Works on all devices
+- ✅ **Full-Stack Development** - Next.js + FastAPI
+- ✅ **AI/ML Integration** - NLP, Multi-source fact verification
+- ✅ **Regulatory Knowledge** - Compliance, audit trails
+- ✅ **System Design** - Scalable microservices architecture
+- ✅ **Production Quality** - Deployed, tested, documented
 
 ---
 
 ## 🤝 Contributing
 
-This is a portfolio project, but suggestions and feedback are welcome!
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
-## 🔧 DevOps & Production Readiness
+## 📞 Contact
 
-**See [DEVOPS_ACTION_PLAN.md](./DEVOPS_ACTION_PLAN.md)** for complete DevOps implementation guide including:
-- Docker containerization
-- CI/CD pipeline setup
-- Testing infrastructure
-- Monitoring & logging
-- Security hardening
-- Performance optimization
+<div align="center">
+
+**Umang Kumar Chaudhary**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/umang-kumar-chaudhary-084b65208/)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/UmangKumarchaudhary)
+[![Portfolio](https://img.shields.io/badge/Portfolio-FF5722?style=for-the-badge&logo=google-chrome&logoColor=white)](https://umangchaudhary.netlify.app/)
+
+📧 **Email:** umangkumarchaudhary1@gmail.com
+
+</div>
 
 ---
 
 ## 📄 License
 
-This project is for portfolio/educational purposes.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🎯 Use Cases
+<div align="center">
 
-### Financial Services
-- Investment advice chatbots
-- Credit limit inquiries
-- Financial product recommendations
-- Regulatory compliance (SEC, CFPB)
-
-### Airlines
-- Customer service chatbots
-- Flight information
-- Refund policies
-- DOT compliance
-
-### Consulting
-- Research assistants
-- Regulatory citations
-- Client advice
-- Accuracy requirements
-
-### Healthcare
-- Medical information chatbots
-- Treatment recommendations
-- HIPAA compliance
-- Accuracy verification
-
----
-
-## 🔒 Security
-
-- **API Key Authentication** - Secure API access
-- **Row Level Security (RLS)** - Database-level security
-- **CORS Configuration** - Controlled cross-origin access
-- **Environment Variables** - Secure credential storage
-- **Audit Logging** - Complete security trail
-
----
-
-## 📞 Support
-
-For questions or issues:
-1. Check [TESTING_GUIDE.md](./TESTING_GUIDE.md)
-2. Review [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
-3. Check phase completion documents
-
----
-
-## 🌟 Highlights
-
-- 🎨 **Premium UI** - Apple-inspired minimalistic design
-- 📱 **Mobile First** - Fully responsive, works on all devices
-- ⚡ **Fast** - Optimized queries, efficient pagination
-- 🔒 **Secure** - RLS policies, API key authentication
-- 📊 **Complete** - End-to-end solution
-- 🧪 **Tested** - Comprehensive test suite
-- 📚 **Documented** - Complete documentation
-- 🚀 **Ready** - Production-ready, deployment-ready
-
----
+### ⭐ Star this repo if you find it helpful!
 
 **Built with ❤️ for solving real-world AI compliance challenges**
 
-**Status: ✅ Production Ready | 🎯 Interview Ready | 🚀 Deployment Ready**
+![Status](https://img.shields.io/badge/Status-✅_Production_Ready-brightgreen?style=for-the-badge)
+![Interview](https://img.shields.io/badge/🎯_Interview_Ready-blue?style=for-the-badge)
+![Deploy](https://img.shields.io/badge/🚀_Deployment_Ready-purple?style=for-the-badge)
+
+</div>

@@ -337,13 +337,13 @@ export default function AITestPage() {
                 {/* Company Selector (AI Mode) */}
                 {mode === 'ai' && (
                   <div>
-                    <label className="block text-sm font-semibold text-black mb-2">
+                    <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
                       Company
                     </label>
                     {loadingCompanies ? (
-                      <div className="px-4 py-3 border border-[#e5e5e5] bg-[#f5f5f5] flex items-center gap-2">
-                        <Loader2 className="animate-spin" size={16} />
-                        <span className="text-sm text-black/60">Loading companies...</span>
+                      <div className="px-4 py-3 flex items-center gap-2" style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)' }}>
+                        <Loader2 className="animate-spin" size={16} style={{ color: 'var(--foreground-muted)' }} />
+                        <span className="text-sm" style={{ color: 'var(--foreground-muted)' }}>Loading companies...</span>
                       </div>
                     ) : (
                       <select
@@ -370,7 +370,7 @@ export default function AITestPage() {
 
                 {/* User Query */}
                 <div>
-                  <label className="block text-sm font-semibold text-black mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
                     User Query
                   </label>
                   <textarea
@@ -391,7 +391,7 @@ export default function AITestPage() {
                 {/* AI Response (Manual Mode) */}
                 {mode === 'manual' && (
                   <div>
-                    <label className="block text-sm font-semibold text-black mb-2">
+                    <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
                       AI Response
                     </label>
                     <textarea
@@ -412,7 +412,7 @@ export default function AITestPage() {
 
                 {/* AI Model */}
                 <div>
-                  <label className="block text-sm font-semibold text-black mb-2">
+                  <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
                     AI Model
                   </label>
                   <select
@@ -459,17 +459,18 @@ export default function AITestPage() {
 
               {/* Quick Examples */}
               {!result && (
-                <div className="mt-8 pt-8 border-t border-[#e5e5e5]">
-                  <h3 className="text-sm font-semibold text-black mb-4">Quick Examples</h3>
+                <div className="mt-8 pt-8" style={{ borderTop: '1px solid var(--border)' }}>
+                  <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--foreground)' }}>Quick Examples</h3>
                   <div className="space-y-2">
                     {QUICK_EXAMPLES.map((example, idx) => (
                       <button
                         key={idx}
                         onClick={() => setFormData(prev => ({ ...prev, query: example.query }))}
-                        className="w-full p-4 border border-[#e5e5e5] bg-white text-left hover:bg-[#f5f5f5] transition-colors"
+                        className="w-full p-4 text-left transition-colors"
+                        style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)' }}
                       >
-                        <p className="text-sm font-medium text-black mb-1">{example.category}</p>
-                        <p className="text-xs text-black/60">{example.query}</p>
+                        <p className="text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>{example.category}</p>
+                        <p className="text-xs" style={{ color: 'var(--foreground-muted)' }}>{example.query}</p>
                       </button>
                     ))}
                   </div>
@@ -482,10 +483,10 @@ export default function AITestPage() {
               <h2 className="text-xl lg:text-2xl font-bold mb-6" style={{ color: 'var(--foreground)' }}>Validation Results</h2>
 
               {!result && !loading && (
-                <div className="flex items-center justify-center h-96 text-black/40">
+                <div className="flex items-center justify-center h-96">
                   <div className="text-center">
-                    <FileText size={48} className="mx-auto mb-4 opacity-20" />
-                    <p className="text-sm">Submit a {mode === 'ai' ? 'query' : 'response'} to see validation results</p>
+                    <FileText size={48} className="mx-auto mb-4 opacity-20" style={{ color: 'var(--foreground-muted)' }} />
+                    <p className="text-sm" style={{ color: 'var(--foreground-muted)' }}>Submit a {mode === 'ai' ? 'query' : 'response'} to see validation results</p>
                   </div>
                 </div>
               )}
@@ -494,20 +495,20 @@ export default function AITestPage() {
                 <div className="space-y-6">
                   {/* AI Response (AI Mode) */}
                   {mode === 'ai' && (
-                    <div className="pb-6 border-b border-[#e5e5e5]">
-                      <h3 className="text-sm font-semibold text-black mb-3 flex items-center gap-2">
+                    <div className="pb-6" style={{ borderBottom: '1px solid var(--border)' }}>
+                      <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
                         <Sparkles size={16} />
                         Generated AI Response
                       </h3>
-                      <div className="p-4 bg-[#f5f5f5] border border-[#e5e5e5]">
-                        <p className="text-sm text-black whitespace-pre-wrap leading-relaxed">
+                      <div className="p-4" style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)' }}>
+                        <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--foreground)' }}>
                           {result.ai_response}
                         </p>
                       </div>
                       {result.company_context && (
-                        <div className="mt-3 flex items-center gap-4 text-xs text-black/60">
-                          <span>Company: <strong className="text-black">{result.company_context.name}</strong></span>
-                          <span>Industry: <strong className="text-black">{result.company_context.industry}</strong></span>
+                        <div className="mt-3 flex items-center gap-4 text-xs" style={{ color: 'var(--foreground-muted)' }}>
+                          <span>Company: <strong style={{ color: 'var(--foreground)' }}>{result.company_context.name}</strong></span>
+                          <span>Industry: <strong style={{ color: 'var(--foreground)' }}>{result.company_context.industry}</strong></span>
                         </div>
                       )}
                     </div>
@@ -516,14 +517,14 @@ export default function AITestPage() {
                   {/* Status and Confidence */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs text-black/60 mb-2">Status</p>
+                      <p className="text-xs mb-2" style={{ color: 'var(--foreground-muted)' }}>Status</p>
                       <span className={`inline-block px-4 py-2 text-xs font-semibold ${getStatusColor(result.validation_result.status)}`}>
                         {result.validation_result.status.toUpperCase()}
                       </span>
                     </div>
                     <div>
-                      <p className="text-xs text-black/60 mb-2">Confidence</p>
-                      <p className="text-2xl font-bold text-black">
+                      <p className="text-xs mb-2" style={{ color: 'var(--foreground-muted)' }}>Confidence</p>
+                      <p className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>
                         {(result.validation_result.confidence_score * 100).toFixed(0)}%
                       </p>
                     </div>
@@ -531,35 +532,36 @@ export default function AITestPage() {
 
                   {/* Confidence Score Breakdown */}
                   {result.validation_result.confidence_breakdown && (
-                    <div className="border border-[#e5e5e5]">
+                    <div style={{ border: '1px solid var(--border)' }}>
                       <button
                         onClick={() => toggleSection('breakdown')}
-                        className="w-full p-4 bg-[#f5f5f5] flex items-center justify-between hover:bg-[#e5e5e5] transition-colors"
+                        className="w-full p-4 flex items-center justify-between transition-colors"
+                        style={{ background: 'var(--background-tertiary)' }}
                       >
-                        <h3 className="text-sm font-semibold text-black flex items-center gap-2">
+                        <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
                           <span>📊</span>
                           Score Breakdown
                         </h3>
                         {expandedSections.has('breakdown') ? (
-                          <ChevronUp size={16} className="text-black/60" />
+                          <ChevronUp size={16} style={{ color: 'var(--foreground-muted)' }} />
                         ) : (
-                          <ChevronDown size={16} className="text-black/60" />
+                          <ChevronDown size={16} style={{ color: 'var(--foreground-muted)' }} />
                         )}
                       </button>
                       {expandedSections.has('breakdown') && (
-                        <div className="p-6 bg-white space-y-5">
+                        <div className="p-6 space-y-5" style={{ background: 'var(--background)' }}>
                           {/* Overall Score */}
-                          <div className="pb-4 border-b border-[#e5e5e5]">
+                          <div className="pb-4" style={{ borderBottom: '1px solid var(--border)' }}>
                             <div className="flex items-baseline justify-between mb-2">
-                              <p className="text-sm font-semibold text-black">Overall Confidence Score</p>
-                              <p className="text-3xl font-bold text-black">
+                              <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>Overall Confidence Score</p>
+                              <p className="text-3xl font-bold" style={{ color: 'var(--foreground)' }}>
                                 {(result.validation_result.confidence_score * 100).toFixed(0)}%
                               </p>
                             </div>
-                            <div className="w-full h-2 bg-[#e5e5e5] mt-3">
+                            <div className="w-full h-2 mt-3" style={{ background: 'var(--border)' }}>
                               <div
-                                className="h-full bg-black transition-all"
-                                style={{ width: `${result.validation_result.confidence_score * 100}%` }}
+                                className="h-full transition-all"
+                                style={{ width: `${result.validation_result.confidence_score * 100}%`, background: 'var(--accent)' }}
                               />
                             </div>
                           </div>
@@ -583,29 +585,29 @@ export default function AITestPage() {
                                 <div key={key} className="space-y-2">
                                   <div className="flex items-center justify-between">
                                     <div className="flex-1">
-                                      <p className="text-sm font-semibold text-black mb-1">
+                                      <p className="text-sm font-semibold mb-1" style={{ color: 'var(--foreground)' }}>
                                         {component.label}
                                       </p>
-                                      <p className="text-xs text-black/60">{component.description}</p>
+                                      <p className="text-xs" style={{ color: 'var(--foreground-muted)' }}>{component.description}</p>
                                     </div>
                                     <div className="text-right ml-4">
-                                      <p className="text-lg font-bold text-black">
+                                      <p className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>
                                         {scorePercent.toFixed(0)}%
                                       </p>
-                                      <p className="text-xs text-black/40">
+                                      <p className="text-xs" style={{ color: 'var(--foreground-muted)' }}>
                                         {weightPercent.toFixed(0)}% weight
                                       </p>
                                     </div>
                                   </div>
-                                  <div className="w-full h-3 bg-[#e5e5e5]">
+                                  <div className="w-full h-3" style={{ background: 'var(--border)' }}>
                                     <div
                                       className={`h-full ${getScoreColor(component.score)} transition-all`}
                                       style={{ width: `${scorePercent}%` }}
                                     />
                                   </div>
                                   {component.details && Object.keys(component.details).length > 0 && (
-                                    <div className="mt-2 pt-2 border-t border-[#e5e5e5]">
-                                      <div className="flex flex-wrap gap-3 text-xs text-black/60">
+                                    <div className="mt-2 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+                                      <div className="flex flex-wrap gap-3 text-xs" style={{ color: 'var(--foreground-muted)' }}>
                                         {Object.entries(component.details).map(([detailKey, detailValue]: [string, any]) => (
                                           <span key={detailKey}>
                                             <span className="font-medium">{detailKey.replace(/_/g, ' ')}:</span> {String(detailValue)}
@@ -620,13 +622,13 @@ export default function AITestPage() {
 
                           {/* Contributions */}
                           {result.validation_result.confidence_breakdown.contributions && (
-                            <div className="pt-4 border-t border-[#e5e5e5] space-y-3">
+                            <div className="pt-4 space-y-3" style={{ borderTop: '1px solid var(--border)' }}>
                               {result.validation_result.confidence_breakdown.contributions.positive_factors?.length > 0 && (
                                 <div>
                                   <p className="text-xs font-semibold text-[#10b981] mb-2">✅ Positive Factors</p>
                                   <ul className="space-y-1">
                                     {result.validation_result.confidence_breakdown.contributions.positive_factors.map((factor: string, idx: number) => (
-                                      <li key={idx} className="text-xs text-black/70 flex items-start gap-2">
+                                      <li key={idx} className="text-xs flex items-start gap-2" style={{ color: 'var(--foreground-secondary)' }}>
                                         <span className="text-[#10b981] mt-0.5">•</span>
                                         <span>{factor}</span>
                                       </li>
@@ -639,7 +641,7 @@ export default function AITestPage() {
                                   <p className="text-xs font-semibold text-[#f59e0b] mb-2">⚠️ Areas for Improvement</p>
                                   <ul className="space-y-1">
                                     {result.validation_result.confidence_breakdown.contributions.negative_factors.map((factor: string, idx: number) => (
-                                      <li key={idx} className="text-xs text-black/70 flex items-start gap-2">
+                                      <li key={idx} className="text-xs flex items-start gap-2" style={{ color: 'var(--foreground-secondary)' }}>
                                         <span className="text-[#f59e0b] mt-0.5">•</span>
                                         <span>{factor}</span>
                                       </li>
@@ -656,32 +658,33 @@ export default function AITestPage() {
 
                   {/* Violations */}
                   {result.validation_result.violations.length > 0 && (
-                    <div className="border border-[#e5e5e5]">
+                    <div style={{ border: '1px solid var(--border)' }}>
                       <button
                         onClick={() => toggleSection('violations')}
-                        className="w-full p-4 bg-[#f5f5f5] flex items-center justify-between hover:bg-[#e5e5e5] transition-colors"
+                        className="w-full p-4 flex items-center justify-between transition-colors"
+                        style={{ background: 'var(--background-tertiary)' }}
                       >
-                        <h3 className="text-sm font-semibold text-black flex items-center gap-2">
+                        <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
                           <AlertTriangle size={16} />
                           Violations ({result.validation_result.violations.length})
                         </h3>
                         {expandedSections.has('violations') ? (
-                          <ChevronUp size={16} className="text-black/60" />
+                          <ChevronUp size={16} style={{ color: 'var(--foreground-muted)' }} />
                         ) : (
-                          <ChevronDown size={16} className="text-black/60" />
+                          <ChevronDown size={16} style={{ color: 'var(--foreground-muted)' }} />
                         )}
                       </button>
                       {expandedSections.has('violations') && (
                         <div className="p-4 space-y-3">
                           {result.validation_result.violations.map((violation, idx) => (
-                            <div key={idx} className="p-4 bg-white border-l-4 border-[#dc2626] border border-[#e5e5e5]">
+                            <div key={idx} className="p-4" style={{ background: 'var(--background)', borderLeft: '4px solid var(--danger)', border: '1px solid var(--border)' }}>
                               <div className="flex items-start justify-between mb-2">
-                                <span className="text-xs font-semibold text-black">{violation.type.toUpperCase()}</span>
+                                <span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>{violation.type.toUpperCase()}</span>
                                 <span className={`text-xs font-semibold ${getSeverityColor(violation.severity)}`}>
                                   {violation.severity.toUpperCase()}
                                 </span>
                               </div>
-                              <p className="text-sm text-black/80 leading-relaxed">{violation.description}</p>
+                              <p className="text-sm leading-relaxed" style={{ color: 'var(--foreground-secondary)' }}>{violation.description}</p>
                             </div>
                           ))}
                         </div>
@@ -691,25 +694,26 @@ export default function AITestPage() {
 
                   {/* Verification Results */}
                   {result.validation_result.verification_results.length > 0 && (
-                    <div className="border border-[#e5e5e5]">
+                    <div style={{ border: '1px solid var(--border)' }}>
                       <button
                         onClick={() => toggleSection('verification')}
-                        className="w-full p-4 bg-[#f5f5f5] flex items-center justify-between hover:bg-[#e5e5e5] transition-colors"
+                        className="w-full p-4 flex items-center justify-between transition-colors"
+                        style={{ background: 'var(--background-tertiary)' }}
                       >
-                        <h3 className="text-sm font-semibold text-black">
+                        <h3 className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
                           Fact Verification ({result.validation_result.verification_results.length})
                         </h3>
                         {expandedSections.has('verification') ? (
-                          <ChevronUp size={16} className="text-black/60" />
+                          <ChevronUp size={16} style={{ color: 'var(--foreground-muted)' }} />
                         ) : (
-                          <ChevronDown size={16} className="text-black/60" />
+                          <ChevronDown size={16} style={{ color: 'var(--foreground-muted)' }} />
                         )}
                       </button>
                       {expandedSections.has('verification') && (
                         <div className="p-4 space-y-3">
                           {result.validation_result.verification_results.map((vr, idx) => (
-                            <div key={idx} className="p-4 bg-white border border-[#e5e5e5]">
-                              <p className="text-sm font-medium text-black mb-3">{vr.claim_text}</p>
+                            <div key={idx} className="p-4" style={{ background: 'var(--background)', border: '1px solid var(--border)' }}>
+                              <p className="text-sm font-medium mb-3" style={{ color: 'var(--foreground)' }}>{vr.claim_text}</p>
                               <div className="flex items-center gap-3 flex-wrap mb-3">
                                 <span className={`text-xs font-semibold px-3 py-1 ${vr.verification_status === 'verified' ? 'bg-[#10b981]/10 text-[#10b981]' :
                                   vr.verification_status === 'unverified' ? 'bg-[#f59e0b]/10 text-[#f59e0b]' :
@@ -717,18 +721,18 @@ export default function AITestPage() {
                                   }`}>
                                   {vr.verification_status.toUpperCase()}
                                 </span>
-                                <span className="text-xs text-black/60">
+                                <span className="text-xs" style={{ color: 'var(--foreground-muted)' }}>
                                   {(vr.confidence * 100).toFixed(0)}% confidence
                                 </span>
                                 {vr.source && (
-                                  <span className="text-xs text-black/60">
+                                  <span className="text-xs" style={{ color: 'var(--foreground-muted)' }}>
                                     Source: <span className="font-medium capitalize">{vr.source}</span>
                                   </span>
                                 )}
                               </div>
                               {vr.details && (
-                                <div className="mt-3 pt-3 border-t border-[#e5e5e5]">
-                                  <p className="text-xs text-black/80 leading-relaxed">{vr.details}</p>
+                                <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
+                                  <p className="text-xs leading-relaxed" style={{ color: 'var(--foreground-secondary)' }}>{vr.details}</p>
                                 </div>
                               )}
                               {vr.url && (
@@ -737,7 +741,8 @@ export default function AITestPage() {
                                     href={vr.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs text-black/60 hover:text-black flex items-center gap-1"
+                                    className="text-xs flex items-center gap-1"
+                                    style={{ color: 'var(--accent)' }}
                                   >
                                     View source <ExternalLink size={12} />
                                   </a>
@@ -767,18 +772,18 @@ export default function AITestPage() {
                   {result.correction_suggested &&
                     result.corrected_response &&
                     (result.corrected_response.trim() === result.ai_response.trim() || result.validation_result.violations.length === 0) && (
-                      <div className="p-4 bg-[#f0fdf4] border border-[#10b981]">
-                        <h3 className="text-sm font-semibold text-black mb-3 flex items-center gap-2">
+                      <div className="p-4" style={{ background: 'var(--success-bg)', border: '1px solid var(--success)' }}>
+                        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--foreground)' }}>
                           <CheckCircle size={16} className="text-[#10b981]" />
                           Corrected Response
                         </h3>
-                        <p className="text-sm text-black whitespace-pre-wrap leading-relaxed mb-3">
+                        <p className="text-sm whitespace-pre-wrap leading-relaxed mb-3" style={{ color: 'var(--foreground)' }}>
                           {result.corrected_response}
                         </p>
                         {result.changes_made && result.changes_made.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-[#10b981]">
-                            <p className="text-xs font-semibold text-black mb-2">Changes Made:</p>
-                            <ul className="list-disc list-inside text-xs text-black/80 space-y-1">
+                          <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--success)' }}>
+                            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--foreground)' }}>Changes Made:</p>
+                            <ul className="list-disc list-inside text-xs space-y-1" style={{ color: 'var(--foreground-secondary)' }}>
                               {result.changes_made.map((change, idx) => (
                                 <li key={idx}>{change}</li>
                               ))}
@@ -789,18 +794,18 @@ export default function AITestPage() {
                     )}
 
                   {/* Explanation */}
-                  <div className="p-4 bg-[#f5f5f5] border border-[#e5e5e5]">
-                    <h3 className="text-sm font-semibold text-black mb-3">Explanation</h3>
-                    <p className="text-sm text-black whitespace-pre-wrap leading-relaxed">
+                  <div className="p-4" style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)' }}>
+                    <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--foreground)' }}>Explanation</h3>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--foreground-secondary)' }}>
                       {result.validation_result.explanation}
                     </p>
                   </div>
 
                   {/* Success Message */}
                   {result.validation_result.status === 'approved' && result.validation_result.violations.length === 0 && (
-                    <div className="p-4 bg-[#f0fdf4] border border-[#10b981] flex items-center gap-3">
+                    <div className="p-4 flex items-center gap-3" style={{ background: 'var(--success-bg)', border: '1px solid var(--success)' }}>
                       <CheckCircle className="text-[#10b981]" size={20} />
-                      <p className="text-sm text-black">Response approved! No violations detected.</p>
+                      <p className="text-sm" style={{ color: 'var(--foreground)' }}>Response approved! No violations detected.</p>
                     </div>
                   )}
 
@@ -808,7 +813,8 @@ export default function AITestPage() {
                   {result.interaction_id && (
                     <button
                       onClick={() => router.push(`/interactions/${result.interaction_id}`)}
-                      className="w-full px-4 py-3 border border-black bg-white text-black font-semibold hover:bg-black hover:text-white transition-colors flex items-center justify-center gap-2"
+                      className="w-full px-4 py-3 font-semibold transition-colors flex items-center justify-center gap-2"
+                      style={{ background: 'var(--background-tertiary)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
                     >
                       <span>View Full Details</span>
                       <ExternalLink size={16} />
@@ -819,8 +825,8 @@ export default function AITestPage() {
             </div>
           </div>
         </div>
-      </div>
-    </DashboardLayout>
+      </div >
+    </DashboardLayout >
   )
 }
 
