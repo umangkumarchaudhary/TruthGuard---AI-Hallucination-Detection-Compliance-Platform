@@ -233,7 +233,8 @@ body {
 
 /* Mobile sidebar - explicit transform transition */
 .mobile-sidebar {
-  transition: transform 0.3s ease !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, visibility 0.3s ease !important;
+  will-change: transform;
 }
 
 /* Mobile overlay */

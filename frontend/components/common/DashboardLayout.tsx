@@ -166,18 +166,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Top Header Bar */}
           <div className="h-20 flex items-center justify-between px-6 lg:px-8 relative">
             {/* Left: Mobile Menu Only */}
-            <div className="flex items-center w-16 lg:w-0">
+            <div className="flex items-center w-16 lg:w-0 relative z-20">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden transition-colors"
+                className="lg:hidden transition-colors p-2"
                 style={{ color: 'var(--foreground)' }}
+                aria-label="Open menu"
               >
                 <Menu size={22} />
               </button>
             </div>
 
             {/* Center: Main Title - Absolutely Centered */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-full max-w-3xl px-4">
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-full max-w-3xl px-4 pointer-events-none z-10">
               <h1
                 className="text-2xl lg:text-4xl font-bold text-center tracking-tighter leading-tight"
                 style={{ color: 'var(--foreground)' }}

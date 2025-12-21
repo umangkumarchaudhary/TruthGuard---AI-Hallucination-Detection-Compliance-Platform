@@ -363,8 +363,8 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="p-4 lg:p-8">
         {/* Header */}
-        <div className="mb-8 animate-slide-down">
-          <div className="flex items-center gap-3 mb-2">
+        <div className="mb-8 animate-slide-down text-center sm:text-left">
+          <div className="flex items-center justify-center sm:justify-start gap-3 mb-2">
             <div
               className="w-2 h-2 rounded-full animate-pulse"
               style={{ background: 'var(--success)' }}
@@ -390,7 +390,9 @@ export default function DashboardPage() {
           <div className="space-y-8 stagger-children">
             {/* Metrics Cards */}
             {isMobile ? (
-              <MobileMetricsCarousel cards={metricCards} />
+              <div className="max-w-sm mx-auto">
+                <MobileMetricsCarousel cards={metricCards} />
+              </div>
             ) : (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {metricCards.map((card) => (
